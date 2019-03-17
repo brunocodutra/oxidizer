@@ -1,7 +1,13 @@
 [package]
 name = "oxidizer"
 version = "0.1.0"
-authors = ["Bruno Dutra <brunocodutra@gmail.com>"]
 edition = "2018"
+authors = ["Bruno Dutra <brunocodutra@gmail.com>"]
+description = "A backend agnostic immediate mode GUI library"
+repository = "https://github.com/brunocodutra/oxidizer.git"
+license = "MIT"
+readme = "README.md"
+keywords = ["gui", "ui", "async"]
+categories = ["gui"]
 
 [dependencies]
