@@ -11,3 +11,6 @@ keywords = ["gui", "ui", "async"]
 categories = ["gui"]
 
 [dependencies]
+
+[dev-dependencies]
+proptest = "0.9.1"
