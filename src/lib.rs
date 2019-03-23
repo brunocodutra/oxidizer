@@ -1,4 +1,5 @@
 mod mock;
-pub mod widget;
+mod sugar;
 
+pub mod widget;
 pub use widget::Widget;
