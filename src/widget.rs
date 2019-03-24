@@ -1,10 +1,12 @@
 mod button;
 mod checkbox;
+mod column;
 mod entry;
 mod row;
 
 pub use button::*;
 pub use checkbox::*;
+pub use column::*;
 pub use entry::*;
 pub use row::*;
 
@@ -13,6 +15,7 @@ pub use row::*;
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub enum Widget<A: 'static> {
     Row(Row<A>),
+    Column(Column<A>),
     Button(Button<A>),
     Entry(Entry<A>),
     Checkbox(Checkbox<A>),
@@ -25,6 +28,7 @@ impl<A> PartialEq for Widget<A> {
         use Widget::*;
         match (self, other) {
             (Row(a), Row(b)) => a == b,
+            (Column(a), Column(b)) => a == b,
             (Button(a), Button(b)) => a == b,
             (Entry(a), Entry(b)) => a == b,
             (Checkbox(a), Checkbox(b)) => a == b,
@@ -40,6 +44,7 @@ impl<A> Hash for Widget<A> {
         use Widget::*;
         match self {
             Row(v) => v.hash(state),
+            Column(v) => v.hash(state),
             Button(v) => v.hash(state),
             Entry(v) => v.hash(state),
             Checkbox(v) => v.hash(state),
@@ -73,6 +78,7 @@ impl<A: 'static + Debug> Arbitrary for Widget<A> {
             |inner| {
                 prop_oneof![
                     any_with::<Row<A>>(Some(inner.clone())).prop_map(Widget::Row),
+                    any_with::<Column<A>>(Some(inner.clone())).prop_map(Widget::Column),
                 ]
             },
         )
