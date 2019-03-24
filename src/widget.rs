@@ -1,15 +1,18 @@
 mod button;
 mod checkbox;
 mod entry;
+mod row;
 
 pub use button::*;
 pub use checkbox::*;
 pub use entry::*;
+pub use row::*;
 
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub enum Widget<A: 'static> {
+    Row(Row<A>),
     Button(Button<A>),
     Entry(Entry<A>),
     Checkbox(Checkbox<A>),
@@ -21,6 +24,7 @@ impl<A> PartialEq for Widget<A> {
     fn eq(&self, other: &Self) -> bool {
         use Widget::*;
         match (self, other) {
+            (Row(a), Row(b)) => a == b,
             (Button(a), Button(b)) => a == b,
             (Entry(a), Entry(b)) => a == b,
             (Checkbox(a), Checkbox(b)) => a == b,
@@ -35,6 +39,7 @@ impl<A> Hash for Widget<A> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         use Widget::*;
         match self {
+            Row(v) => v.hash(state),
             Button(v) => v.hash(state),
             Entry(v) => v.hash(state),
             Checkbox(v) => v.hash(state),
@@ -61,6 +66,16 @@ impl<A: 'static + Debug> Arbitrary for Widget<A> {
             any::<Entry<A>>().prop_map(Widget::Entry),
             any::<Checkbox<A>>().prop_map(Widget::Checkbox),
         ]
+        .prop_recursive(
+            4,  // depth
+            16, // size
+            2,  // breadth
+            |inner| {
+                prop_oneof![
+                    any_with::<Row<A>>(Some(inner.clone())).prop_map(Widget::Row),
+                ]
+            },
+        )
         .boxed()
     }
 }
