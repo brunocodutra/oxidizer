@@ -14,3 +14,4 @@ categories = ["gui"]
 
 [dev-dependencies]
 proptest = "0.9.1"
+proptest-derive = "0.1.0"
