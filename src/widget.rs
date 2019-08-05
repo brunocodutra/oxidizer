@@ -10,6 +10,8 @@ pub use column::*;
 pub use entry::*;
 pub use row::*;
 
+use std::mem::discriminant;
+
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
@@ -49,6 +51,8 @@ impl<A> Hash for Widget<A> {
             Entry(v) => v.hash(state),
             Checkbox(v) => v.hash(state),
         }
+
+        discriminant(self).hash(state);
     }
 }
 
@@ -91,6 +95,7 @@ mod tests {
     use super::*;
     use crate::mock::*;
     use proptest::prelude::*;
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[derive(Debug)]
@@ -108,5 +113,19 @@ mod tests {
             widget.hash(&mut hasher);
             assert_eq!(hasher.finish(), 0);
         }
+    }
+
+    #[test]
+    fn widget_hash_depends_on_discriminant() {
+        let col = Widget::<Action>::Column(Column { children: vec![] });
+        let row = Widget::<Action>::Row(Row { children: vec![] });
+
+        let mut a = DefaultHasher::new();
+        col.hash(&mut a);
+
+        let mut b = DefaultHasher::new();
+        row.hash(&mut b);
+
+        assert_ne!(a.finish(), b.finish())
     }
 }
