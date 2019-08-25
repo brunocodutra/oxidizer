@@ -1,7 +1,7 @@
 use super::Widget;
 
 #[cfg(test)]
-use proptest::{arbitrary::any, collection::vec, strategy::BoxedStrategy};
+use super::ChildrenStrategy;
 
 #[cfg(test)]
 use proptest_derive::Arbitrary;
@@ -18,12 +18,9 @@ use proptest_derive::Arbitrary;
 )]
 #[cfg_attr(test, derive(Arbitrary))]
 #[cfg_attr(test, proptest(no_bound))]
-#[cfg_attr(test, proptest(params = "Option<BoxedStrategy<Widget<A>>>"))]
+#[cfg_attr(test, proptest(params = "ChildrenStrategy<A>"))]
 pub struct Column<A: 'static> {
-    #[cfg_attr(
-        test,
-        proptest(strategy = "vec(params.unwrap_or_else(any::<Widget<A>>), 0..3)")
-    )]
+    #[cfg_attr(test, proptest(strategy = "params"))]
     pub children: Vec<Widget<A>>,
 }
 
