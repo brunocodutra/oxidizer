@@ -1,3 +1,5 @@
+use crate::event::Clicked;
+
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
@@ -17,7 +19,7 @@ pub struct Button<A: 'static> {
     pub label: String,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub on_click: Option<fn() -> A>,
+    pub handler: Option<fn(Button<A>, Clicked) -> A>,
 }
 
 #[cfg(test)]
@@ -36,7 +38,7 @@ mod tests {
             Button::<Action>::default(),
             Button {
                 label: "".into(),
-                on_click: None,
+                handler: None,
             }
         );
     }

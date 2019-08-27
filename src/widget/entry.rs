@@ -1,3 +1,5 @@
+use crate::event::Entered;
+
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
@@ -17,7 +19,7 @@ pub struct Entry<A: 'static> {
     pub value: String,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub on_change: Option<fn(String) -> A>,
+    pub handler: Option<fn(Entry<A>, Entered) -> A>,
 }
 
 #[cfg(test)]
@@ -36,7 +38,7 @@ mod tests {
             Entry::<Action>::default(),
             Entry {
                 value: "".into(),
-                on_change: None,
+                handler: None,
             }
         );
     }

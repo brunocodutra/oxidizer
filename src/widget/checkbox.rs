@@ -1,3 +1,5 @@
+use crate::event::Toggled;
+
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
@@ -18,7 +20,7 @@ pub struct Checkbox<A: 'static> {
     pub value: bool,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub on_toggle: Option<fn(bool) -> A>,
+    pub handler: Option<fn(Checkbox<A>, Toggled) -> A>,
 }
 
 #[cfg(test)]
@@ -38,7 +40,7 @@ mod tests {
             Checkbox {
                 value: false,
                 label: "".into(),
-                on_toggle: None,
+                handler: None,
             }
         );
     }
