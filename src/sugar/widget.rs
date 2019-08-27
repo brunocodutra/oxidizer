@@ -26,23 +26,23 @@
 ///                 children: vec![
 ///                     Widget::from(Entry {
 ///                         value: "".into(),
-///                         on_change: None,
+///                         handler: None,
 ///                     }),
 ///                     Widget::from(Button {
 ///                         label: "Add Todo".into(),
-///                         on_click: None,
+///                         handler: None,
 ///                     }),
 ///                 ]
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "buy milk".into(),
-///                 on_toggle: None,
+///                 handler: None,
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "learn oxidizer".into(),
-///                 on_toggle: None,
+///                 handler: None,
 ///             }),
 ///         ]
 ///     })
@@ -83,7 +83,7 @@ macro_rules! widget {
 
 #[cfg(test)]
 mod tests {
-    use crate::widget::*;
+    use crate::{event::*, widget::*};
     use proptest::prelude::*;
 
     proptest! {
@@ -188,12 +188,12 @@ mod tests {
 
         #[test]
         fn button_optionally_takes_a_handler(_: ()) {
-            let on_click = Some::<fn()>(|| {});
+            let handler = Some::<fn(Button<()>, Clicked)>(|_, _| {});
 
             assert_eq!(
-                widget!(Button { on_click }),
+                widget!(Button { handler }),
                 Widget::Button(Button {
-                    on_click,
+                    handler,
                     ..Default::default()
                 })
             );
@@ -220,12 +220,12 @@ mod tests {
 
         #[test]
         fn entry_optionally_takes_a_handler(_: ()) {
-            let on_change = Some::<fn(String)>(|_| {});
+            let handler = Some::<fn(Entry<()>, Entered)>(|_, _| {});
 
             assert_eq!(
-                widget!(Entry { on_change }),
+                widget!(Entry { handler }),
                 Widget::Entry(Entry {
-                    on_change,
+                    handler,
                     ..Default::default()
                 })
             );
@@ -250,12 +250,12 @@ mod tests {
 
         #[test]
         fn checkbox_optionally_takes_a_handler(_: ()) {
-            let on_toggle = Some::<fn(bool)>(|_| {});
+            let handler = Some::<fn(Checkbox<()>, Toggled)>(|_, _| {});
 
             assert_eq!(
-                widget!(Checkbox { on_toggle }),
+                widget!(Checkbox { handler }),
                 Widget::Checkbox(Checkbox {
-                    on_toggle,
+                    handler,
                     ..Default::default()
                 })
             );
