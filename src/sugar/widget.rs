@@ -5,7 +5,7 @@
 ///
 /// ## Example
 /// ```rust
-/// use oxidizer::*;
+/// use oxidizer::{*, widget::*};
 ///
 /// enum Action { /* ... */ }
 ///
@@ -20,26 +20,26 @@
 ///     ]
 /// );
 ///
-/// assert_eq!(ui, Widget::Column(widget::Column {
+/// assert_eq!(ui, Widget::from(Column {
 ///         children: vec![
-///             Widget::Row(widget::Row {
+///             Widget::from(Row {
 ///                 children: vec![
-///                     Widget::Entry(widget::Entry {
+///                     Widget::from(Entry {
 ///                         value: "".into(),
 ///                         on_change: None,
 ///                     }),
-///                     Widget::Button(widget::Button {
+///                     Widget::from(Button {
 ///                         label: "Add Todo".into(),
 ///                         on_click: None,
 ///                     }),
 ///                 ]
 ///             }),
-///             Widget::Checkbox(widget::Checkbox {
+///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "buy milk".into(),
 ///                 on_toggle: None,
 ///             }),
-///             Widget::Checkbox(widget::Checkbox {
+///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "learn oxidizer".into(),
 ///                 on_toggle: None,
