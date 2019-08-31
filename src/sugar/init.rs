@@ -5,7 +5,7 @@ macro_rules! init {
         {
             #[allow(clippy::needless_update)]
             $t {
-                $($($p: $v $(, $ps: $vs)*,)*)*
+                $($($p: $v.into() $(, $ps: $vs.into())*,)*)*
                 ..Default::default()
             }
         }
@@ -68,6 +68,20 @@ mod tests {
                     age,
                 }),
                 Person { name, age }
+            );
+        }
+
+        #[test]
+        fn init_does_implicit_conversion(name: Box<str>, age: u16) {
+            assert_eq!(
+                init!(Person {
+                    name: name.clone(),
+                    age
+                }),
+                Person {
+                    name: name.into(),
+                    age: age.into(),
+                }
             );
         }
     }

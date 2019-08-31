@@ -13,10 +13,10 @@
 ///     Column [
 ///         Row [
 ///             Entry
-///             Button { label: "Add Todo".into() }
+///             Button { label: "Add Todo" }
 ///         ]
-///         Checkbox { label: "buy milk".into() }
-///         Checkbox { label: "learn oxidizer".into() }
+///         Checkbox { label: "buy milk" }
+///         Checkbox { label: "learn oxidizer" }
 ///     ]
 /// );
 ///
@@ -25,23 +25,23 @@
 ///             Widget::from(Row {
 ///                 children: vec![
 ///                     Widget::from(Entry {
-///                         value: "".into(),
+///                         value: "".to_string(),
 ///                         handler: None,
 ///                     }),
 ///                     Widget::from(Button {
-///                         label: "Add Todo".into(),
+///                         label: "Add Todo".to_string(),
 ///                         handler: None,
 ///                     }),
 ///                 ]
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
-///                 label: "buy milk".into(),
+///                 label: "buy milk".to_string(),
 ///                 handler: None,
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
-///                 label: "learn oxidizer".into(),
+///                 label: "learn oxidizer".to_string(),
 ///                 handler: None,
 ///             }),
 ///         ]
