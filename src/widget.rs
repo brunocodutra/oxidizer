@@ -10,8 +10,6 @@ pub use column::*;
 pub use entry::*;
 pub use row::*;
 
-use std::mem::discriminant;
-
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
@@ -40,6 +38,7 @@ impl<A> PartialEq for Widget<A> {
 }
 
 use std::hash::{Hash, Hasher};
+use std::mem::discriminant;
 
 impl<A> Hash for Widget<A> {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -53,6 +52,36 @@ impl<A> Hash for Widget<A> {
         }
 
         discriminant(self).hash(state);
+    }
+}
+
+impl<A: 'static> From<Row<A>> for Widget<A> {
+    fn from(row: Row<A>) -> Self {
+        Widget::Row(row)
+    }
+}
+
+impl<A: 'static> From<Column<A>> for Widget<A> {
+    fn from(column: Column<A>) -> Self {
+        Widget::Column(column)
+    }
+}
+
+impl<A: 'static> From<Button<A>> for Widget<A> {
+    fn from(button: Button<A>) -> Self {
+        Widget::Button(button)
+    }
+}
+
+impl<A: 'static> From<Entry<A>> for Widget<A> {
+    fn from(entry: Entry<A>) -> Self {
+        Widget::Entry(entry)
+    }
+}
+
+impl<A: 'static> From<Checkbox<A>> for Widget<A> {
+    fn from(checkbox: Checkbox<A>) -> Self {
+        Widget::Checkbox(checkbox)
     }
 }
 
@@ -139,6 +168,31 @@ mod tests {
     enum Action {}
 
     proptest! {
+        #[test]
+        fn from_row(widget: Row<Action>) {
+            assert_eq!(Widget::from(widget.clone()), Widget::Row(widget));
+        }
+
+        #[test]
+        fn from_column(widget: Column<Action>) {
+            assert_eq!(Widget::from(widget.clone()), Widget::Column(widget));
+        }
+
+        #[test]
+        fn from_button(widget: Button<Action>) {
+            assert_eq!(Widget::from(widget.clone()), Widget::Button(widget));
+        }
+
+        #[test]
+        fn from_entry(widget: Entry<Action>) {
+            assert_eq!(Widget::from(widget.clone()), Widget::Entry(widget));
+        }
+
+        #[test]
+        fn from_checkbox(widget: Checkbox<Action>) {
+            assert_eq!(Widget::from(widget.clone()), Widget::Checkbox(widget));
+        }
+
         #[test]
         fn clone(widget: Widget<Action>) {
             assert_eq!(widget.clone(), widget);
