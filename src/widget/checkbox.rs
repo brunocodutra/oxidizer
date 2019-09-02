@@ -1,4 +1,4 @@
-use crate::event::Toggled;
+use crate::{event::Toggled, widget::Widget, Handler, Kind};
 
 #[cfg(test)]
 use proptest_derive::Arbitrary;
@@ -20,8 +20,10 @@ pub struct Checkbox<A: 'static> {
     pub value: bool,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub handler: Option<fn(Checkbox<A>, Toggled) -> A>,
+    pub handler: Option<Handler<Checkbox<A>, Toggled, A>>,
 }
+
+impl<A> Kind<Widget<A>> for Checkbox<A> {}
 
 #[cfg(test)]
 mod tests {

@@ -83,7 +83,7 @@ macro_rules! widget {
 
 #[cfg(test)]
 mod tests {
-    use crate::{event::*, widget::*};
+    use crate::{widget::*, Handler};
     use proptest::prelude::*;
 
     proptest! {
@@ -188,12 +188,12 @@ mod tests {
 
         #[test]
         fn button_optionally_takes_a_handler(_: ()) {
-            let handler = Some::<fn(Button<()>, Clicked)>(|_, _| {});
+            let h = |_, _| {};
 
             assert_eq!(
-                widget!(Button { handler }),
+                widget!(Button { handler: Handler::new(h) }),
                 Widget::Button(Button {
-                    handler,
+                    handler: Some(Handler::new(h)),
                     ..Default::default()
                 })
             );
@@ -220,12 +220,12 @@ mod tests {
 
         #[test]
         fn entry_optionally_takes_a_handler(_: ()) {
-            let handler = Some::<fn(Entry<()>, Entered)>(|_, _| {});
+            let h = |_, _| {};
 
             assert_eq!(
-                widget!(Entry { handler }),
+                widget!(Entry { handler: Handler::new(h) }),
                 Widget::Entry(Entry {
-                    handler,
+                    handler: Some(Handler::new(h)),
                     ..Default::default()
                 })
             );
@@ -250,12 +250,12 @@ mod tests {
 
         #[test]
         fn checkbox_optionally_takes_a_handler(_: ()) {
-            let handler = Some::<fn(Checkbox<()>, Toggled)>(|_, _| {});
+            let h = |_, _| {};
 
             assert_eq!(
-                widget!(Checkbox { handler }),
+                widget!(Checkbox { handler: Handler::new(h) }),
                 Widget::Checkbox(Checkbox {
-                    handler,
+                    handler: Some(Handler::new(h)),
                     ..Default::default()
                 })
             );

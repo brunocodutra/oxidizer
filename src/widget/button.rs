@@ -1,4 +1,4 @@
-use crate::event::Clicked;
+use crate::{event::Clicked, widget::Widget, Handler, Kind};
 
 #[cfg(test)]
 use proptest_derive::Arbitrary;
@@ -19,8 +19,10 @@ pub struct Button<A: 'static> {
     pub label: String,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub handler: Option<fn(Button<A>, Clicked) -> A>,
+    pub handler: Option<Handler<Button<A>, Clicked, A>>,
 }
+
+impl<A> Kind<Widget<A>> for Button<A> {}
 
 #[cfg(test)]
 mod tests {
