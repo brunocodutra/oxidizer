@@ -1,8 +1,5 @@
 use crate::{event::Clicked, widget::Widget, Handler, Kind};
 
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// The semantic representation of a button.
 #[derive(derivative::Derivative)]
 #[derivative(
@@ -13,25 +10,37 @@ use proptest_derive::Arbitrary;
     PartialEq(bound = ""),
     Hash(bound = "")
 )]
-#[cfg_attr(test, derive(Arbitrary))]
-#[cfg_attr(test, proptest(no_bound))]
-pub struct Button<A: 'static> {
+pub struct Button<A> {
     pub label: String,
-
-    #[cfg_attr(test, proptest(value = "None"))]
     pub handler: Option<Handler<Button<A>, Clicked, A>>,
 }
 
 impl<A> Kind<Widget<A>> for Button<A> {}
 
 #[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*};
+
+#[cfg(test)]
+impl<A: 'static> Arbitrary for Button<A> {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        any::<String>()
+            .prop_map(|label| Button {
+                label,
+                handler: None,
+            })
+            .boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
-    #[derive(Debug)]
     enum Action {}
 
     #[test]

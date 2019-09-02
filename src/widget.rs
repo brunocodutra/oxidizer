@@ -13,7 +13,7 @@ pub use row::*;
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
-pub enum Widget<A: 'static> {
+pub enum Widget<A> {
     Row(Row<A>),
     Column(Column<A>),
     Button(Button<A>),
@@ -55,31 +55,31 @@ impl<A> Hash for Widget<A> {
     }
 }
 
-impl<A: 'static> From<Row<A>> for Widget<A> {
+impl<A> From<Row<A>> for Widget<A> {
     fn from(row: Row<A>) -> Self {
         Widget::Row(row)
     }
 }
 
-impl<A: 'static> From<Column<A>> for Widget<A> {
+impl<A> From<Column<A>> for Widget<A> {
     fn from(column: Column<A>) -> Self {
         Widget::Column(column)
     }
 }
 
-impl<A: 'static> From<Button<A>> for Widget<A> {
+impl<A> From<Button<A>> for Widget<A> {
     fn from(button: Button<A>) -> Self {
         Widget::Button(button)
     }
 }
 
-impl<A: 'static> From<Entry<A>> for Widget<A> {
+impl<A> From<Entry<A>> for Widget<A> {
     fn from(entry: Entry<A>) -> Self {
         Widget::Entry(entry)
     }
 }
 
-impl<A: 'static> From<Checkbox<A>> for Widget<A> {
+impl<A> From<Checkbox<A>> for Widget<A> {
     fn from(checkbox: Checkbox<A>) -> Self {
         Widget::Checkbox(checkbox)
     }
@@ -87,9 +87,6 @@ impl<A: 'static> From<Checkbox<A>> for Widget<A> {
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, collection::*, prelude::*, strategy::*, test_runner::*};
-
-#[cfg(test)]
-use std::fmt::Debug;
 
 #[cfg(test)]
 const DEPTH: usize = 3;
@@ -108,7 +105,7 @@ pub struct Cardinality(
 #[cfg(test)]
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Default(bound = ""), Clone(bound = ""))]
-pub struct ChildrenStrategy<A: 'static + Debug>(
+pub struct ChildrenStrategy<A: 'static>(
     #[derivative(Default(
         value = "vec(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..BREADTH)"
     ))]
@@ -116,7 +113,7 @@ pub struct ChildrenStrategy<A: 'static + Debug>(
 );
 
 #[cfg(test)]
-pub fn children<A: 'static + Debug, T: Strategy<Value = Widget<A>> + 'static>(
+pub fn children<A, T: Strategy<Value = Widget<A>> + 'static>(
     widgets: T,
     size: impl Into<SizeRange>,
 ) -> ChildrenStrategy<A> {
@@ -124,7 +121,7 @@ pub fn children<A: 'static + Debug, T: Strategy<Value = Widget<A>> + 'static>(
 }
 
 #[cfg(test)]
-impl<A: 'static + Debug> Strategy for ChildrenStrategy<A> {
+impl<A> Strategy for ChildrenStrategy<A> {
     type Tree = <VecStrategy<BoxedStrategy<Widget<A>>> as Strategy>::Tree;
     type Value = <VecStrategy<BoxedStrategy<Widget<A>>> as Strategy>::Value;
 
@@ -134,7 +131,7 @@ impl<A: 'static + Debug> Strategy for ChildrenStrategy<A> {
 }
 
 #[cfg(test)]
-impl<A: 'static + Debug> Arbitrary for Widget<A> {
+impl<A: 'static> Arbitrary for Widget<A> {
     type Parameters = Cardinality;
     type Strategy = BoxedStrategy<Self>;
 
@@ -164,7 +161,6 @@ mod tests {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
-    #[derive(Debug)]
     enum Action {}
 
     proptest! {

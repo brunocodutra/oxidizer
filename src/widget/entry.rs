@@ -1,8 +1,5 @@
 use crate::{event::Entered, widget::Widget, Handler, Kind};
 
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// The semantic representation of text input.
 #[derive(derivative::Derivative)]
 #[derivative(
@@ -13,25 +10,37 @@ use proptest_derive::Arbitrary;
     PartialEq(bound = ""),
     Hash(bound = "")
 )]
-#[cfg_attr(test, derive(Arbitrary))]
-#[cfg_attr(test, proptest(no_bound))]
-pub struct Entry<A: 'static> {
+pub struct Entry<A> {
     pub value: String,
-
-    #[cfg_attr(test, proptest(value = "None"))]
     pub handler: Option<Handler<Entry<A>, Entered, A>>,
 }
 
 impl<A> Kind<Widget<A>> for Entry<A> {}
 
 #[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*};
+
+#[cfg(test)]
+impl<A: 'static> Arbitrary for Entry<A> {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        any::<String>()
+            .prop_map(|value| Entry {
+                value,
+                handler: None,
+            })
+            .boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
-    #[derive(Debug)]
     enum Action {}
 
     #[test]

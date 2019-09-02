@@ -1,8 +1,5 @@
 use crate::{event::Toggled, widget::Widget, Handler, Kind};
 
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// The semantic representation of a checkbox.
 #[derive(derivative::Derivative)]
 #[derivative(
@@ -13,26 +10,39 @@ use proptest_derive::Arbitrary;
     PartialEq(bound = ""),
     Hash(bound = "")
 )]
-#[cfg_attr(test, derive(Arbitrary))]
-#[cfg_attr(test, proptest(no_bound))]
-pub struct Checkbox<A: 'static> {
+pub struct Checkbox<A> {
     pub label: String,
     pub value: bool,
-
-    #[cfg_attr(test, proptest(value = "None"))]
     pub handler: Option<Handler<Checkbox<A>, Toggled, A>>,
 }
 
 impl<A> Kind<Widget<A>> for Checkbox<A> {}
 
 #[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*};
+
+#[cfg(test)]
+impl<A: 'static> Arbitrary for Checkbox<A> {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        (any::<String>(), any::<bool>())
+            .prop_map(|(label, value)| Checkbox {
+                label,
+                value,
+                handler: None,
+            })
+            .boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
-    #[derive(Debug)]
     enum Action {}
 
     #[test]
