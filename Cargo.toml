@@ -15,4 +15,3 @@ derivative = "1.0.2"
 
 [dev-dependencies]
 proptest = "0.9.1"
-proptest-derive = "0.1.0"

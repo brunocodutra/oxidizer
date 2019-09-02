@@ -1,11 +1,7 @@
 use crate::{event::Event, Kind};
 
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// An event that may change the value associated with a widget.
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
-#[cfg_attr(test, derive(Arbitrary))]
 pub struct Changed<T> {
     /// The new value associated with the widget after an user interaction.
     pub value: T,
@@ -23,10 +19,22 @@ pub type Toggled = Changed<bool>;
 pub type Clicked = Changed<()>;
 
 #[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*};
+
+#[cfg(test)]
+impl<T: 'static + Arbitrary> Arbitrary for Changed<T> {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        any::<T>().prop_map(|value| Changed { value }).boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
     #[test]

@@ -2,16 +2,11 @@ mod changed;
 
 pub use changed::*;
 
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// The semantic representation of an event.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-#[cfg_attr(test, derive(Arbitrary))]
 pub enum Event {
-    Entered(Changed<String>),
+    Entered(Entered),
     Toggled(Toggled),
-    #[cfg_attr(test, allow(clippy::unit_arg))]
     Clicked(Clicked),
 }
 
@@ -34,10 +29,27 @@ impl From<Clicked> for Event {
 }
 
 #[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*};
+
+#[cfg(test)]
+impl Arbitrary for Event {
+    type Parameters = ();
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        prop_oneof![
+            any::<Entered>().prop_map(Event::Entered),
+            any::<Toggled>().prop_map(Event::Toggled),
+            any::<Clicked>().prop_map(Event::Clicked),
+        ]
+        .boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
     proptest! {
