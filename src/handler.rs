@@ -3,7 +3,7 @@ use crate::{event::Event, widget::Widget, Kind};
 /// An event handler.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Copy(bound = ""), Clone(bound = ""))]
-pub enum Handler<W: Into<Widget<A>>, E: Into<Event>, A: 'static> {
+pub enum Handler<W: Into<Widget<A>>, E: Into<Event>, A> {
     #[doc(hidden)]
     A(fn(W, E) -> A),
     #[doc(hidden)]
@@ -14,7 +14,7 @@ pub enum Handler<W: Into<Widget<A>>, E: Into<Event>, A: 'static> {
     D(fn(Widget<A>, Event) -> A),
 }
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> Handler<W, E, A> {
+impl<W: Into<Widget<A>>, E: Into<Event>, A> Handler<W, E, A> {
     pub fn new(f: fn(W, E) -> A) -> Self {
         Handler::A(f)
     }
@@ -30,9 +30,9 @@ impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> Handler<W, E, A> {
     }
 }
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> Eq for Handler<W, E, A> {}
+impl<W: Into<Widget<A>>, E: Into<Event>, A> Eq for Handler<W, E, A> {}
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> PartialEq for Handler<W, E, A> {
+impl<W: Into<Widget<A>>, E: Into<Event>, A> PartialEq for Handler<W, E, A> {
     fn eq(&self, other: &Self) -> bool {
         use Handler::*;
         match (self, other) {
@@ -48,7 +48,7 @@ impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> PartialEq for Handler<W, E,
 use std::hash::{Hash, Hasher};
 use std::mem::discriminant;
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A: 'static> Hash for Handler<W, E, A> {
+impl<W: Into<Widget<A>>, E: Into<Event>, A> Hash for Handler<W, E, A> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         use Handler::*;
         match self {
@@ -66,7 +66,6 @@ impl<W, E, A> From<fn(W, E) -> A> for Handler<W, E, A>
 where
     W: Into<Widget<A>> + Kind<Widget<A>>,
     E: Into<Event> + Kind<Event>,
-    A: 'static,
 {
     fn from(f: fn(W, E) -> A) -> Self {
         Handler::A(f)
@@ -77,7 +76,6 @@ impl<W, E, A> From<fn(Widget<A>, E) -> A> for Handler<W, E, A>
 where
     W: Into<Widget<A>>,
     E: Into<Event> + Kind<Event>,
-    A: 'static,
 {
     fn from(f: fn(Widget<A>, E) -> A) -> Self {
         Handler::B(f)
@@ -88,7 +86,6 @@ impl<W, E, A> From<fn(W, Event) -> A> for Handler<W, E, A>
 where
     W: Into<Widget<A>> + Kind<Widget<A>>,
     E: Into<Event>,
-    A: 'static,
 {
     fn from(f: fn(W, Event) -> A) -> Self {
         Handler::C(f)
@@ -99,7 +96,6 @@ impl<W, E, A> From<fn(Widget<A>, Event) -> A> for Handler<W, E, A>
 where
     W: Into<Widget<A>>,
     E: Into<Event>,
-    A: 'static,
 {
     fn from(f: fn(Widget<A>, Event) -> A) -> Self {
         Handler::D(f)
@@ -110,7 +106,6 @@ impl<W, E, A> From<Handler<Widget<A>, E, A>> for Handler<W, E, A>
 where
     W: Into<Widget<A>> + Kind<Widget<A>>,
     E: Into<Event>,
-    A: 'static,
 {
     fn from(h: Handler<Widget<A>, E, A>) -> Self {
         use Handler::*;
@@ -127,7 +122,6 @@ impl<W, E, A> From<Handler<W, Event, A>> for Handler<W, E, A>
 where
     W: Into<Widget<A>>,
     E: Into<Event> + Kind<Event>,
-    A: 'static,
 {
     fn from(h: Handler<W, Event, A>) -> Self {
         use Handler::*;
@@ -144,7 +138,6 @@ impl<W, E, A> From<Handler<Widget<A>, Event, A>> for Handler<W, E, A>
 where
     W: Into<Widget<A>> + Kind<Widget<A>>,
     E: Into<Event> + Kind<Event>,
-    A: 'static,
 {
     fn from(h: Handler<Widget<A>, Event, A>) -> Self {
         use Handler::*;

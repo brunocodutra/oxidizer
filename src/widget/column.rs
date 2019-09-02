@@ -1,11 +1,5 @@
 use crate::{widget::Widget, Kind};
 
-#[cfg(test)]
-use super::ChildrenStrategy;
-
-#[cfg(test)]
-use proptest_derive::Arbitrary;
-
 /// The semantic representation of a container that displays widgets horizontally.
 #[derive(derivative::Derivative)]
 #[derivative(
@@ -16,24 +10,34 @@ use proptest_derive::Arbitrary;
     PartialEq(bound = ""),
     Hash(bound = "")
 )]
-#[cfg_attr(test, derive(Arbitrary))]
-#[cfg_attr(test, proptest(no_bound))]
-#[cfg_attr(test, proptest(params = "ChildrenStrategy<A>"))]
-pub struct Column<A: 'static> {
-    #[cfg_attr(test, proptest(strategy = "params"))]
+pub struct Column<A> {
     pub children: Vec<Widget<A>>,
 }
 
 impl<A> Kind<Widget<A>> for Column<A> {}
 
 #[cfg(test)]
+use super::ChildrenStrategy;
+
+#[cfg(test)]
+use proptest::{arbitrary::Arbitrary, prelude::*, strategy::Strategy};
+
+#[cfg(test)]
+impl<A: 'static> Arbitrary for Column<A> {
+    type Parameters = ChildrenStrategy<A>;
+    type Strategy = BoxedStrategy<Self>;
+
+    fn arbitrary_with(params: Self::Parameters) -> Self::Strategy {
+        params.prop_map(|children| Column { children }).boxed()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::mock::*;
-    use proptest::prelude::*;
     use std::hash::{Hash, Hasher};
 
-    #[derive(Debug)]
     enum Action {}
 
     #[test]
