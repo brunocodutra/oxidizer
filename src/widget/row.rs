@@ -1,4 +1,4 @@
-use super::Widget;
+use crate::{widget::Widget, Kind};
 
 #[cfg(test)]
 use super::ChildrenStrategy;
@@ -23,6 +23,8 @@ pub struct Row<A: 'static> {
     #[cfg_attr(test, proptest(strategy = "params"))]
     pub children: Vec<Widget<A>>,
 }
+
+impl<A> Kind<Widget<A>> for Row<A> {}
 
 #[cfg(test)]
 mod tests {

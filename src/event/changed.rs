@@ -1,3 +1,5 @@
+use crate::{event::Event, Kind};
+
 #[cfg(test)]
 use proptest_derive::Arbitrary;
 
@@ -8,6 +10,8 @@ pub struct Changed<T> {
     /// The new value associated with the widget after an user interaction.
     pub value: T,
 }
+
+impl<T> Kind<Event> for Changed<T> {}
 
 /// Convenience alias for an event that changes the input associated with the widget.
 pub type Entered = Changed<String>;

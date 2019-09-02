@@ -1,4 +1,4 @@
-use crate::event::Entered;
+use crate::{event::Entered, widget::Widget, Handler, Kind};
 
 #[cfg(test)]
 use proptest_derive::Arbitrary;
@@ -19,8 +19,10 @@ pub struct Entry<A: 'static> {
     pub value: String,
 
     #[cfg_attr(test, proptest(value = "None"))]
-    pub handler: Option<fn(Entry<A>, Entered) -> A>,
+    pub handler: Option<Handler<Entry<A>, Entered, A>>,
 }
+
+impl<A> Kind<Widget<A>> for Entry<A> {}
 
 #[cfg(test)]
 mod tests {
