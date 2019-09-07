@@ -1,9 +1,9 @@
-use crate::{event::Event, widget::Widget, Kind};
+use crate::{event::Event, widget::Widget, Kind, Variant};
 
 /// An event handler.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Copy(bound = ""), Clone(bound = ""))]
-pub enum Handler<W: Into<Widget<A>>, E: Into<Event>, A> {
+pub enum Handler<W: Kind<Widget<A>>, E: Kind<Event>, A> {
     #[doc(hidden)]
     A(fn(W, E) -> A),
     #[doc(hidden)]
@@ -14,7 +14,7 @@ pub enum Handler<W: Into<Widget<A>>, E: Into<Event>, A> {
     D(fn(Widget<A>, Event) -> A),
 }
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A> Handler<W, E, A> {
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Handler<W, E, A> {
     pub fn new(f: fn(W, E) -> A) -> Self {
         Handler::A(f)
     }
@@ -30,9 +30,9 @@ impl<W: Into<Widget<A>>, E: Into<Event>, A> Handler<W, E, A> {
     }
 }
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A> Eq for Handler<W, E, A> {}
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Eq for Handler<W, E, A> {}
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A> PartialEq for Handler<W, E, A> {
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> PartialEq for Handler<W, E, A> {
     fn eq(&self, other: &Self) -> bool {
         use Handler::*;
         match (self, other) {
@@ -48,7 +48,7 @@ impl<W: Into<Widget<A>>, E: Into<Event>, A> PartialEq for Handler<W, E, A> {
 use std::hash::{Hash, Hasher};
 use std::mem::discriminant;
 
-impl<W: Into<Widget<A>>, E: Into<Event>, A> Hash for Handler<W, E, A> {
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Hash for Handler<W, E, A> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         use Handler::*;
         match self {
@@ -64,8 +64,8 @@ impl<W: Into<Widget<A>>, E: Into<Event>, A> Hash for Handler<W, E, A> {
 
 impl<W, E, A> From<fn(W, E) -> A> for Handler<W, E, A>
 where
-    W: Into<Widget<A>> + Kind<Widget<A>>,
-    E: Into<Event> + Kind<Event>,
+    W: Variant<Widget<A>>,
+    E: Variant<Event>,
 {
     fn from(f: fn(W, E) -> A) -> Self {
         Handler::A(f)
@@ -74,8 +74,8 @@ where
 
 impl<W, E, A> From<fn(Widget<A>, E) -> A> for Handler<W, E, A>
 where
-    W: Into<Widget<A>>,
-    E: Into<Event> + Kind<Event>,
+    W: Kind<Widget<A>>,
+    E: Variant<Event>,
 {
     fn from(f: fn(Widget<A>, E) -> A) -> Self {
         Handler::B(f)
@@ -84,8 +84,8 @@ where
 
 impl<W, E, A> From<fn(W, Event) -> A> for Handler<W, E, A>
 where
-    W: Into<Widget<A>> + Kind<Widget<A>>,
-    E: Into<Event>,
+    W: Variant<Widget<A>>,
+    E: Kind<Event>,
 {
     fn from(f: fn(W, Event) -> A) -> Self {
         Handler::C(f)
@@ -94,8 +94,8 @@ where
 
 impl<W, E, A> From<fn(Widget<A>, Event) -> A> for Handler<W, E, A>
 where
-    W: Into<Widget<A>>,
-    E: Into<Event>,
+    W: Kind<Widget<A>>,
+    E: Kind<Event>,
 {
     fn from(f: fn(Widget<A>, Event) -> A) -> Self {
         Handler::D(f)
@@ -104,8 +104,8 @@ where
 
 impl<W, E, A> From<Handler<Widget<A>, E, A>> for Handler<W, E, A>
 where
-    W: Into<Widget<A>> + Kind<Widget<A>>,
-    E: Into<Event>,
+    W: Variant<Widget<A>>,
+    E: Kind<Event>,
 {
     fn from(h: Handler<Widget<A>, E, A>) -> Self {
         use Handler::*;
@@ -120,8 +120,8 @@ where
 
 impl<W, E, A> From<Handler<W, Event, A>> for Handler<W, E, A>
 where
-    W: Into<Widget<A>>,
-    E: Into<Event> + Kind<Event>,
+    W: Kind<Widget<A>>,
+    E: Variant<Event>,
 {
     fn from(h: Handler<W, Event, A>) -> Self {
         use Handler::*;
@@ -136,8 +136,8 @@ where
 
 impl<W, E, A> From<Handler<Widget<A>, Event, A>> for Handler<W, E, A>
 where
-    W: Into<Widget<A>> + Kind<Widget<A>>,
-    E: Into<Event> + Kind<Event>,
+    W: Variant<Widget<A>>,
+    E: Variant<Event>,
 {
     fn from(h: Handler<Widget<A>, Event, A>) -> Self {
         use Handler::*;
@@ -156,8 +156,8 @@ use proptest::{arbitrary::Arbitrary, prelude::*};
 #[cfg(test)]
 impl<W, E, A> Arbitrary for Handler<W, E, A>
 where
-    W: 'static + Into<Widget<A>>,
-    E: 'static + Into<Event>,
+    W: 'static + Kind<Widget<A>>,
+    E: 'static + Kind<Event>,
     A: 'static + Default,
 {
     type Parameters = ();

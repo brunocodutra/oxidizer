@@ -10,5 +10,12 @@ pub use event::Event;
 pub mod widget;
 pub use widget::Widget;
 
-/// Marker trait that denotes the variant of `enum T`.
-pub trait Kind<T> {}
+/// Marker trait used to denote an abstract _kind_.
+///
+/// A [`Kind`] and its [`Variant`]s form a closed polymorphic group.
+pub trait Kind<T>: Into<T> {}
+
+/// Marker trait used to denote the variants of a [`Kind`].
+pub trait Variant<T: Kind<T>>: Kind<T> {}
+
+impl<T: Kind<T>, U: Variant<T>> Kind<T> for U {}

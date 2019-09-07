@@ -1,4 +1,4 @@
-use crate::{event::Toggled, widget::Widget, Handler, Kind};
+use crate::{event::Toggled, widget::Widget, Handler, Variant};
 
 /// The semantic representation of a checkbox.
 #[derive(derivative::Derivative)]
@@ -16,7 +16,7 @@ pub struct Checkbox<A> {
     pub handler: Option<Handler<Checkbox<A>, Toggled, A>>,
 }
 
-impl<A> Kind<Widget<A>> for Checkbox<A> {}
+impl<A> Variant<Widget<A>> for Checkbox<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};
