@@ -2,6 +2,8 @@ mod changed;
 
 pub use changed::*;
 
+use crate::Kind;
+
 /// The semantic representation of an event.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum Event {
@@ -9,6 +11,8 @@ pub enum Event {
     Toggled(Toggled),
     Clicked(Clicked),
 }
+
+impl Kind<Event> for Event {}
 
 impl From<Entered> for Event {
     fn from(entered: Entered) -> Self {

@@ -1,4 +1,4 @@
-use crate::{widget::Widget, Kind};
+use crate::{widget::Widget, Variant};
 
 /// The semantic representation of a container that displays widgets horizontally.
 #[derive(derivative::Derivative)]
@@ -14,7 +14,7 @@ pub struct Column<A> {
     pub children: Vec<Widget<A>>,
 }
 
-impl<A> Kind<Widget<A>> for Column<A> {}
+impl<A> Variant<Widget<A>> for Column<A> {}
 
 #[cfg(test)]
 use super::ChildrenStrategy;

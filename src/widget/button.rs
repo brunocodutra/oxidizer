@@ -1,4 +1,4 @@
-use crate::{event::Clicked, widget::Widget, Handler, Kind};
+use crate::{event::Clicked, widget::Widget, Handler, Variant};
 
 /// The semantic representation of a button.
 #[derive(derivative::Derivative)]
@@ -15,7 +15,7 @@ pub struct Button<A> {
     pub handler: Option<Handler<Button<A>, Clicked, A>>,
 }
 
-impl<A> Kind<Widget<A>> for Button<A> {}
+impl<A> Variant<Widget<A>> for Button<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};

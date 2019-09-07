@@ -1,4 +1,4 @@
-use crate::{event::Event, Kind};
+use crate::{event::Event, Variant};
 
 /// An event that may change the value associated with a widget.
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash)]
@@ -7,16 +7,20 @@ pub struct Changed<T> {
     pub value: T,
 }
 
-impl<T> Kind<Event> for Changed<T> {}
-
 /// Convenience alias for an event that changes the input associated with the widget.
 pub type Entered = Changed<String>;
+
+impl Variant<Event> for Entered {}
 
 /// Convenience alias for an event that toggles the value associated with the widget.
 pub type Toggled = Changed<bool>;
 
+impl Variant<Event> for Toggled {}
+
 /// Convenience alias for an event that doesn't change the value associated with the widget.
 pub type Clicked = Changed<()>;
+
+impl Variant<Event> for Clicked {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};

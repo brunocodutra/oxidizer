@@ -10,6 +10,8 @@ pub use column::*;
 pub use entry::*;
 pub use row::*;
 
+use crate::Kind;
+
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
@@ -20,6 +22,8 @@ pub enum Widget<A> {
     Entry(Entry<A>),
     Checkbox(Checkbox<A>),
 }
+
+impl<A> Kind<Widget<A>> for Widget<A> {}
 
 impl<A> Eq for Widget<A> {}
 

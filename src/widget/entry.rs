@@ -1,4 +1,4 @@
-use crate::{event::Entered, widget::Widget, Handler, Kind};
+use crate::{event::Entered, widget::Widget, Handler, Variant};
 
 /// The semantic representation of text input.
 #[derive(derivative::Derivative)]
@@ -15,7 +15,7 @@ pub struct Entry<A> {
     pub handler: Option<Handler<Entry<A>, Entered, A>>,
 }
 
-impl<A> Kind<Widget<A>> for Entry<A> {}
+impl<A> Variant<Widget<A>> for Entry<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};
