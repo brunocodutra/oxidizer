@@ -19,6 +19,15 @@ impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Handler<W, E, A> {
         Handler::A(f)
     }
 
+    fn decay(&self) -> *const () {
+        match *self {
+            Handler::A(f) => f as *const (),
+            Handler::B(f) => f as *const (),
+            Handler::C(f) => f as *const (),
+            Handler::D(f) => f as *const (),
+        }
+    }
+
     pub fn handle(&self, widget: W, event: E) -> A {
         use Handler::*;
         match self {
@@ -34,31 +43,15 @@ impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Eq for Handler<W, E, A> {}
 
 impl<W: Kind<Widget<A>>, E: Kind<Event>, A> PartialEq for Handler<W, E, A> {
     fn eq(&self, other: &Self) -> bool {
-        use Handler::*;
-        match (self, other) {
-            (A(f), A(g)) => f == g,
-            (B(f), B(g)) => f == g,
-            (C(f), C(g)) => f == g,
-            (D(f), D(g)) => f == g,
-            _ => false,
-        }
+        self.decay() == other.decay()
     }
 }
 
 use std::hash::{Hash, Hasher};
-use std::mem::discriminant;
 
 impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Hash for Handler<W, E, A> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        use Handler::*;
-        match self {
-            A(f) => f.hash(state),
-            B(f) => f.hash(state),
-            C(f) => f.hash(state),
-            D(f) => f.hash(state),
-        }
-
-        discriminant(self).hash(state);
+        self.decay().hash(state);
     }
 }
 
@@ -130,7 +123,6 @@ where
 mod tests {
     use super::*;
     use crate::{event::*, mock::*, widget::*};
-    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[derive(Debug, Default, Eq, PartialEq)]
@@ -160,22 +152,6 @@ mod tests {
             handler.hash(&mut hasher);
             assert_eq!(hasher.finish(), 0);
         }
-    }
-
-    #[test]
-    fn handler_hash_depends_on_discriminant() {
-        let h = |_, _| Action;
-
-        let x = Handler::<Widget<_>, Event, Action>::A(h);
-        let y = Handler::<Widget<_>, Event, Action>::D(h);
-
-        let mut a = DefaultHasher::new();
-        x.hash(&mut a);
-
-        let mut b = DefaultHasher::new();
-        y.hash(&mut b);
-
-        assert_ne!(a.finish(), b.finish())
     }
 
     #[test]
