@@ -10,11 +10,11 @@ use crate::{widget::Widget, Variant};
     PartialEq(bound = ""),
     Hash(bound = "")
 )]
-pub struct Column<A> {
-    pub children: Vec<Widget<A>>,
+pub struct Column<'w, A> {
+    pub children: Vec<Widget<'w, A>>,
 }
 
-impl<A> Variant<Widget<A>> for Column<A> {}
+impl<'w, A> Variant<Widget<'w, A>> for Column<'w, A> {}
 
 #[cfg(test)]
 use super::ChildrenStrategy;
@@ -23,7 +23,7 @@ use super::ChildrenStrategy;
 use proptest::{arbitrary::Arbitrary, prelude::*, strategy::Strategy};
 
 #[cfg(test)]
-impl<A: 'static> Arbitrary for Column<A> {
+impl<A: 'static> Arbitrary for Column<'static, A> {
     type Parameters = ChildrenStrategy<A>;
     type Strategy = BoxedStrategy<Self>;
 

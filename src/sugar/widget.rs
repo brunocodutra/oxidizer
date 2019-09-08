@@ -9,14 +9,19 @@
 ///
 /// enum Action { /* ... */ }
 ///
+/// let handle: fn(&Widget<_>, &Event) -> _ = |widget, event| {
+///     // ...
+///     # unimplemented!()
+/// };
+///
 /// let ui: Widget<Action> = widget!(
 ///     Column [
 ///         Row [
-///             Entry
-///             Button { label: "Add Todo" }
+///             Entry { handler: Handler::from(handle) }
+///             Button { label: "Add Todo", handler: Handler::from(handle) }
 ///         ]
-///         Checkbox { label: "buy milk" }
-///         Checkbox { label: "learn oxidizer" }
+///         Checkbox { label: "buy milk", handler: Handler::from(handle) }
+///         Checkbox { label: "learn oxidizer", handler: Handler::from(handle) }
 ///     ]
 /// );
 ///
@@ -26,23 +31,23 @@
 ///                 children: vec![
 ///                     Widget::from(Entry {
 ///                         value: "".to_string(),
-///                         handler: None,
+///                         handler: Some(Handler::from(handle)),
 ///                     }),
 ///                     Widget::from(Button {
 ///                         label: "Add Todo".to_string(),
-///                         handler: None,
+///                         handler: Some(Handler::from(handle)),
 ///                     }),
 ///                 ]
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "buy milk".to_string(),
-///                 handler: None,
+///                 handler: Some(Handler::from(handle)),
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "learn oxidizer".to_string(),
-///                 handler: None,
+///                 handler: Some(Handler::from(handle)),
 ///             }),
 ///         ]
 ///     })
@@ -51,7 +56,7 @@
 #[macro_export]
 macro_rules! widget {
     ( Row $({ $($ps:tt)* })? $([$($ts:ident $({ $($tps:tt)* })? $([$($tts:tt)*])?)*])? ) => {
-        $crate::Widget::Row($crate::init!($crate::widget::Row {
+        $crate::Widget::from($crate::init!($crate::widget::Row {
             children: vec![
                 $($( $crate::widget!($ts $({ $($tps)* })* $([ $($tts)* ])*), )*)*
             ],
@@ -60,7 +65,7 @@ macro_rules! widget {
     };
 
     ( Column $({ $($ps:tt)* })? $([$($ts:ident $({ $($tps:tt)* })? $([$($tts:tt)*])?)*])? ) => {
-        $crate::Widget::Column($crate::init!($crate::widget::Column {
+        $crate::Widget::from($crate::init!($crate::widget::Column {
             children: vec![
                 $($( $crate::widget!($ts $({ $($tps)* })* $([ $($tts)* ])*), )*)*
             ],
@@ -69,15 +74,15 @@ macro_rules! widget {
     };
 
     ( Button $({ $($ps:tt)* })? ) => {
-        $crate::Widget::Button($crate::init!($crate::widget::Button $({ $($ps)* })*))
+        $crate::Widget::from($crate::init!($crate::widget::Button $({ $($ps)* })*))
     };
 
     ( Entry $({ $($ps:tt)* })? ) => {
-        $crate::Widget::Entry($crate::init!($crate::widget::Entry $({ $($ps)* })*))
+        $crate::Widget::from($crate::init!($crate::widget::Entry $({ $($ps)* })*))
     };
 
     ( Checkbox $({ $($ps:tt)* })? ) => {
-        $crate::Widget::Checkbox($crate::init!($crate::widget::Checkbox $({ $($ps)* })*))
+        $crate::Widget::from($crate::init!($crate::widget::Checkbox $({ $($ps)* })*))
     };
 }
 
@@ -110,7 +115,7 @@ mod tests {
                         ]
                     ]
                 ),
-                Widget::Row(Row::<()> {
+                Widget::from(Row::<()> {
                     children: vec![
                         widget!(Entry),
                         widget!(Button {
@@ -150,7 +155,7 @@ mod tests {
                         ]
                     ]
                 ),
-                Widget::Column(Column::<()> {
+                Widget::from(Column::<()> {
                     children: vec![
                         widget!(Entry),
                         widget!(Button {
@@ -179,7 +184,7 @@ mod tests {
                 widget!(Button {
                     label: label.clone()
                 }),
-                Widget::Button::<()>(Button {
+                Widget::<()>::from(Button {
                     label,
                     ..Default::default()
                 })
@@ -188,12 +193,12 @@ mod tests {
 
         #[test]
         fn button_optionally_takes_a_handler(_: ()) {
-            let h = |_, _| {};
+            let handler = Handler::new(|_, _| {});
 
             assert_eq!(
-                widget!(Button { handler: Handler::new(h) }),
-                Widget::Button(Button {
-                    handler: Some(Handler::new(h)),
+                widget!(Button { handler }),
+                Widget::from(Button {
+                    handler: Some(handler),
                     ..Default::default()
                 })
             );
@@ -211,7 +216,7 @@ mod tests {
                 widget!(Entry {
                     value: value.clone()
                 }),
-                Widget::Entry::<()>(Entry {
+                Widget::<()>::from(Entry {
                     value,
                     ..Default::default()
                 })
@@ -220,12 +225,12 @@ mod tests {
 
         #[test]
         fn entry_optionally_takes_a_handler(_: ()) {
-            let h = |_, _| {};
+            let handler = Handler::new(|_, _| {});
 
             assert_eq!(
-                widget!(Entry { handler: Handler::new(h) }),
-                Widget::Entry(Entry {
-                    handler: Some(Handler::new(h)),
+                widget!(Entry { handler }),
+                Widget::from(Entry {
+                    handler: Some(handler),
                     ..Default::default()
                 })
             );
@@ -241,7 +246,7 @@ mod tests {
         fn checkbox_optionally_takes_a_value(value: bool) {
             assert_eq!(
                 widget!(Checkbox { value }),
-                Widget::Checkbox::<()>(Checkbox {
+                Widget::<()>::from(Checkbox {
                     value,
                     ..Default::default()
                 })
@@ -250,12 +255,12 @@ mod tests {
 
         #[test]
         fn checkbox_optionally_takes_a_handler(_: ()) {
-            let h = |_, _| {};
+            let handler = Handler::new(|_, _| {});
 
             assert_eq!(
-                widget!(Checkbox { handler: Handler::new(h) }),
-                Widget::Checkbox(Checkbox {
-                    handler: Some(Handler::new(h)),
+                widget!(Checkbox { handler }),
+                Widget::from(Checkbox {
+                    handler: Some(handler),
                     ..Default::default()
                 })
             );

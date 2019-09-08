@@ -15,7 +15,7 @@ pub struct Button<A> {
     pub handler: Option<Handler<Button<A>, Clicked, A>>,
 }
 
-impl<A> Variant<Widget<A>> for Button<A> {}
+impl<'w, A> Variant<Widget<'w, A>> for Button<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};
