@@ -22,16 +22,20 @@ impl<'w, A> Variant<Widget<'w, A>> for Checkbox<A> {}
 use proptest::{arbitrary::Arbitrary, prelude::*};
 
 #[cfg(test)]
-impl<A: 'static> Arbitrary for Checkbox<A> {
+impl<A: 'static + Default> Arbitrary for Checkbox<A> {
     type Parameters = ();
     type Strategy = BoxedStrategy<Self>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (any::<String>(), any::<bool>())
-            .prop_map(|(label, value)| Checkbox {
+        (
+            any::<String>(),
+            any::<bool>(),
+            any::<Option<Handler<_, _, _>>>(),
+        )
+            .prop_map(|(label, value, handler)| Checkbox {
                 label,
                 value,
-                handler: None,
+                handler,
             })
             .boxed()
     }
@@ -43,7 +47,8 @@ mod tests {
     use crate::mock::*;
     use std::hash::{Hash, Hasher};
 
-    enum Action {}
+    #[derive(Default)]
+    struct Action;
 
     #[test]
     fn default() {

@@ -23,7 +23,7 @@ use super::ChildrenStrategy;
 use proptest::{arbitrary::Arbitrary, prelude::*, strategy::Strategy};
 
 #[cfg(test)]
-impl<A: 'static> Arbitrary for Row<'static, A> {
+impl<A: 'static + Default> Arbitrary for Row<'static, A> {
     type Parameters = ChildrenStrategy<A>;
     type Strategy = BoxedStrategy<Self>;
 
@@ -38,7 +38,8 @@ mod tests {
     use crate::mock::*;
     use std::hash::{Hash, Hasher};
 
-    enum Action {}
+    #[derive(Default)]
+    struct Action;
 
     #[test]
     fn default() {
