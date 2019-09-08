@@ -16,7 +16,7 @@ pub struct Checkbox<A> {
     pub handler: Option<Handler<Checkbox<A>, Toggled, A>>,
 }
 
-impl<A> Variant<Widget<A>> for Checkbox<A> {}
+impl<'w, A> Variant<Widget<'w, A>> for Checkbox<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};

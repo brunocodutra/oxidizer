@@ -15,7 +15,7 @@ pub struct Entry<A> {
     pub handler: Option<Handler<Entry<A>, Entered, A>>,
 }
 
-impl<A> Variant<Widget<A>> for Entry<A> {}
+impl<'w, A> Variant<Widget<'w, A>> for Entry<A> {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};

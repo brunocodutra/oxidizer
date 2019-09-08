@@ -10,17 +10,17 @@ pub struct Changed<T> {
 /// Convenience alias for an event that changes the input associated with the widget.
 pub type Entered = Changed<String>;
 
-impl Variant<Event> for Entered {}
+impl<'e> Variant<Event<'e>> for Entered {}
 
 /// Convenience alias for an event that toggles the value associated with the widget.
 pub type Toggled = Changed<bool>;
 
-impl Variant<Event> for Toggled {}
+impl<'e> Variant<Event<'e>> for Toggled {}
 
 /// Convenience alias for an event that doesn't change the value associated with the widget.
 pub type Clicked = Changed<()>;
 
-impl Variant<Event> for Clicked {}
+impl<'e> Variant<Event<'e>> for Clicked {}
 
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, prelude::*};
