@@ -21,16 +21,13 @@ impl<'w, A> Variant<Widget<'w, A>> for Button<A> {}
 use proptest::{arbitrary::Arbitrary, prelude::*};
 
 #[cfg(test)]
-impl<A: 'static> Arbitrary for Button<A> {
+impl<A: 'static + Default> Arbitrary for Button<A> {
     type Parameters = ();
     type Strategy = BoxedStrategy<Self>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        any::<String>()
-            .prop_map(|label| Button {
-                label,
-                handler: None,
-            })
+        (any::<String>(), any::<Option<Handler<_, _, _>>>())
+            .prop_map(|(label, handler)| Button { label, handler })
             .boxed()
     }
 }
@@ -41,7 +38,8 @@ mod tests {
     use crate::mock::*;
     use std::hash::{Hash, Hasher};
 
-    enum Action {}
+    #[derive(Default)]
+    struct Action;
 
     #[test]
     fn default() {

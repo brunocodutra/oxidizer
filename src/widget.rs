@@ -153,7 +153,7 @@ pub struct Cardinality(
 #[cfg(test)]
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""), Default(bound = ""), Clone(bound = ""))]
-pub struct ChildrenStrategy<A: 'static>(
+pub struct ChildrenStrategy<A: 'static + Default>(
     #[derivative(Default(
         value = "vec(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..BREADTH)"
     ))]
@@ -161,7 +161,7 @@ pub struct ChildrenStrategy<A: 'static>(
 );
 
 #[cfg(test)]
-pub fn children<A, T: Strategy<Value = Widget<'static, A>> + 'static>(
+pub fn children<A: Default, T: Strategy<Value = Widget<'static, A>> + 'static>(
     widgets: T,
     size: impl Into<SizeRange>,
 ) -> ChildrenStrategy<A> {
@@ -169,7 +169,7 @@ pub fn children<A, T: Strategy<Value = Widget<'static, A>> + 'static>(
 }
 
 #[cfg(test)]
-impl<A> Strategy for ChildrenStrategy<A> {
+impl<A: Default> Strategy for ChildrenStrategy<A> {
     type Tree = <VecStrategy<BoxedStrategy<Widget<'static, A>>> as Strategy>::Tree;
     type Value = <VecStrategy<BoxedStrategy<Widget<'static, A>>> as Strategy>::Value;
 
@@ -179,7 +179,7 @@ impl<A> Strategy for ChildrenStrategy<A> {
 }
 
 #[cfg(test)]
-impl<A: 'static> Arbitrary for Widget<'static, A> {
+impl<A: 'static + Default> Arbitrary for Widget<'static, A> {
     type Parameters = Cardinality;
     type Strategy = BoxedStrategy<Self>;
 
@@ -210,7 +210,8 @@ mod tests {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
-    enum Action {}
+    #[derive(Default)]
+    struct Action;
 
     proptest! {
         #[test]
