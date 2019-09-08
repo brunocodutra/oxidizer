@@ -2,7 +2,7 @@ use crate::{event::Event, widget::Widget, Kind, Variant};
 
 /// An event handler.
 #[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""), Copy(bound = ""), Clone(bound = ""))]
+#[derivative(Copy(bound = ""), Clone(bound = ""))]
 pub enum Handler<W: Kind<Widget<A>>, E: Kind<Event>, A> {
     #[doc(hidden)]
     A(fn(W, E) -> A),
@@ -36,6 +36,20 @@ impl<W: Kind<Widget<A>>, E: Kind<Event>, A> Handler<W, E, A> {
             C(f) => f(widget, event.into()),
             D(f) => f(widget.into(), event.into()),
         }
+    }
+}
+
+use std::fmt;
+
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> fmt::Pointer for Handler<W, E, A> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.decay().fmt(f)
+    }
+}
+
+impl<W: Kind<Widget<A>>, E: Kind<Event>, A> fmt::Debug for Handler<W, E, A> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.decay().fmt(f)
     }
 }
 
@@ -138,6 +152,11 @@ mod tests {
         #[test]
         fn handle(w: Widget<Action>, e: Event, handler: Handler<Widget<_>, Event, Action>) {
             assert_eq!(handler.handle(w, e), Action);
+        }
+
+        #[test]
+        fn debug(handler: Handler<Widget<_>, Event, Action>) {
+            assert_eq!(format!("{:?}", handler), format!("{:p}", handler));
         }
 
         #[allow(clippy::clone_on_copy)]
