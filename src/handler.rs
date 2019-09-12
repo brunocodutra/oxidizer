@@ -3,29 +3,70 @@ use crate::{event::Event, widget::Widget, Kind, Variant};
 /// An event handler.
 #[derive(derivative::Derivative)]
 #[derivative(Copy(bound = ""), Clone(bound = ""))]
-pub enum Handler<W, E, A> {
-    #[doc(hidden)]
+enum GenericHandler<W, E, A> {
     A(fn(&W, &E) -> A),
-    #[doc(hidden)]
     B(fn(&Widget<A>, &E) -> A),
-    #[doc(hidden)]
     C(fn(&W, &Event) -> A),
-    #[doc(hidden)]
     D(fn(&Widget<A>, &Event) -> A),
 }
 
+impl<W, E, A> GenericHandler<W, E, A> {
+    fn decay(&self) -> *const () {
+        use GenericHandler::*;
+        match *self {
+            A(f) => f as *const (),
+            B(f) => f as *const (),
+            C(f) => f as *const (),
+            D(f) => f as *const (),
+        }
+    }
+}
+
+use std::fmt;
+
+impl<W, E, A> fmt::Pointer for GenericHandler<W, E, A> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.decay().fmt(f)
+    }
+}
+
+impl<W, E, A> fmt::Debug for GenericHandler<W, E, A> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.decay().fmt(f)
+    }
+}
+
+impl<W, E, A> Eq for GenericHandler<W, E, A> {}
+
+impl<W, E, A> PartialEq for GenericHandler<W, E, A> {
+    fn eq(&self, other: &Self) -> bool {
+        self.decay() == other.decay()
+    }
+}
+
+use std::hash::{Hash, Hasher};
+
+impl<W, E, A> Hash for GenericHandler<W, E, A> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.decay().hash(state);
+    }
+}
+
+/// An event handler.
+#[derive(derivative::Derivative)]
+#[derivative(
+    Debug(bound = ""),
+    Copy(bound = ""),
+    Clone(bound = ""),
+    Eq(bound = ""),
+    PartialEq(bound = ""),
+    Hash(bound = "")
+)]
+pub struct Handler<W, E, A>(GenericHandler<W, E, A>);
+
 impl<W, E, A> Handler<W, E, A> {
     pub fn new(f: fn(&W, &E) -> A) -> Self {
-        Handler::A(f)
-    }
-
-    fn decay(&self) -> *const () {
-        match *self {
-            Handler::A(f) => f as *const (),
-            Handler::B(f) => f as *const (),
-            Handler::C(f) => f as *const (),
-            Handler::D(f) => f as *const (),
-        }
+        Handler(GenericHandler::A(f))
     }
 }
 
@@ -37,42 +78,13 @@ where
     for<'a> Event<'a>: From<&'a E>,
 {
     pub fn handle(&self, widget: &W, event: &E) -> A {
-        match self {
-            Handler::A(f) => f(widget, event),
-            Handler::B(f) => f(&widget.into(), event),
-            Handler::C(f) => f(widget, &event.into()),
-            Handler::D(f) => f(&widget.into(), &event.into()),
+        use GenericHandler::*;
+        match *self {
+            Handler(A(f)) => f(widget, event),
+            Handler(B(f)) => f(&widget.into(), event),
+            Handler(C(f)) => f(widget, &event.into()),
+            Handler(D(f)) => f(&widget.into(), &event.into()),
         }
-    }
-}
-
-use std::fmt;
-
-impl<W, E, A> fmt::Pointer for Handler<W, E, A> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.decay().fmt(f)
-    }
-}
-
-impl<W, E, A> fmt::Debug for Handler<W, E, A> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.decay().fmt(f)
-    }
-}
-
-impl<W, E, A> Eq for Handler<W, E, A> {}
-
-impl<W, E, A> PartialEq for Handler<W, E, A> {
-    fn eq(&self, other: &Self) -> bool {
-        self.decay() == other.decay()
-    }
-}
-
-use std::hash::{Hash, Hasher};
-
-impl<W, E, A> Hash for Handler<W, E, A> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.decay().hash(state);
     }
 }
 
@@ -82,7 +94,7 @@ where
     E: Variant<Event<'e>>,
 {
     fn from(f: fn(&W, &E) -> A) -> Self {
-        Handler::A(f)
+        Handler(GenericHandler::A(f))
     }
 }
 
@@ -92,7 +104,7 @@ where
     E: Variant<Event<'e>>,
 {
     fn from(f: fn(&Widget<A>, &E) -> A) -> Self {
-        Handler::B(f)
+        Handler(GenericHandler::B(f))
     }
 }
 
@@ -102,7 +114,7 @@ where
     E: Kind<Event<'e>>,
 {
     fn from(f: fn(&W, &Event) -> A) -> Self {
-        Handler::C(f)
+        Handler(GenericHandler::C(f))
     }
 }
 
@@ -112,7 +124,7 @@ where
     E: Kind<Event<'e>>,
 {
     fn from(f: fn(&Widget<A>, &Event) -> A) -> Self {
-        Handler::D(f)
+        Handler(GenericHandler::D(f))
     }
 }
 
@@ -131,10 +143,10 @@ where
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
         prop_oneof![
-            Just(Handler::A(|_: &W, _: &E| A::default())),
-            Just(Handler::B(|_: &Widget<A>, _: &E| A::default())),
-            Just(Handler::C(|_: &W, _: &Event| A::default())),
-            Just(Handler::D(|_: &Widget<A>, _: &Event| A::default())),
+            Just(Handler(GenericHandler::A(|_, _| A::default()))),
+            Just(Handler(GenericHandler::B(|_, _| A::default()))),
+            Just(Handler(GenericHandler::C(|_, _| A::default()))),
+            Just(Handler(GenericHandler::D(|_, _| A::default()))),
         ]
         .boxed()
     }
@@ -152,7 +164,7 @@ mod tests {
     #[test]
     fn new() {
         let h = |_: &Widget<Action>, _: &Event| Action;
-        assert_eq!(Handler::new(h), Handler::A(h));
+        assert_eq!(Handler::new(h), Handler(GenericHandler::A(h)));
     }
 
     proptest! {
@@ -163,7 +175,7 @@ mod tests {
 
         #[test]
         fn debug(handler: Handler<Widget<_>, Event, Action>) {
-            assert_eq!(format!("{:?}", handler), format!("{:p}", handler));
+            assert_eq!(format!("{:?}", handler), format!("Handler({:p})", handler.0));
         }
 
         #[allow(clippy::clone_on_copy)]
@@ -187,9 +199,11 @@ mod tests {
         let c: fn(&Button<Action>, &Event) -> _ = |_, _| Action;
         let d: fn(&Widget<Action>, &Event) -> _ = |_, _| Action;
 
-        assert_eq!(Handler::<Button<_>, Entered, _>::from(a), Handler::A(a));
-        assert_eq!(Handler::<Button<_>, Entered, _>::from(b), Handler::B(b));
-        assert_eq!(Handler::<Button<_>, Entered, _>::from(c), Handler::C(c));
-        assert_eq!(Handler::<Button<_>, Entered, _>::from(d), Handler::D(d));
+        use GenericHandler::*;
+
+        assert_eq!(Handler::<Button<_>, Entered, _>::from(a), Handler(A(a)));
+        assert_eq!(Handler::<Button<_>, Entered, _>::from(b), Handler(B(b)));
+        assert_eq!(Handler::<Button<_>, Entered, _>::from(c), Handler(C(c)));
+        assert_eq!(Handler::<Button<_>, Entered, _>::from(d), Handler(D(d)));
     }
 }
