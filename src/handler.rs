@@ -53,6 +53,10 @@ impl<W, E, A> Hash for GenericHandler<W, E, A> {
 }
 
 /// An event handler.
+///
+/// [`Handler`] is semantically equivalent to `fn(&W, &E) -> A`
+/// but can also be constructed out of function pointers that are contra-variant over
+/// `W` and `E` with respect to `Kind<Widget>` and `Kind<Event>` respectively.
 #[derive(derivative::Derivative)]
 #[derivative(
     Debug(bound = ""),
