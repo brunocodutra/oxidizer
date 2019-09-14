@@ -1,5 +1,4 @@
 mod handler;
-mod mock;
 mod sugar;
 
 pub use handler::{Handler, OptionalHandler};

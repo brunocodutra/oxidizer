@@ -35,7 +35,7 @@ impl<A: 'static + Default> Arbitrary for Button<A> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::*;
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[derive(Default)]
@@ -59,10 +59,14 @@ mod tests {
         }
 
         #[test]
-        fn hash(button: Button<Action>) {
-            let mut hasher = NopHash(0);
-            button.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(x: Button<Action>, y: Button<Action>) {
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
     }
 }

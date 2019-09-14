@@ -231,7 +231,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{event::*, mock::*, widget::*};
+    use crate::{event::*, widget::*};
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[derive(Debug, Default, Eq, PartialEq)]
@@ -261,10 +262,17 @@ mod tests {
         }
 
         #[test]
-        fn hash(handler: OptionalHandler<Widget<_>, Event, Action>) {
-            let mut hasher = NopHash(0);
-            handler.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(
+            x: OptionalHandler<Widget<_>, Event, Action>,
+            y: OptionalHandler<Widget<_>, Event, Action>) {
+
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
     }
 

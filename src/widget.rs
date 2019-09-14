@@ -205,7 +205,6 @@ impl<A: 'static + Default> Arbitrary for Widget<'static, A> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::*;
     use maybe_owned::MaybeOwned::*;
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
@@ -255,24 +254,14 @@ mod tests {
         }
 
         #[test]
-        fn hash(w: Widget<Action>) {
-            let mut hasher = NopHash(0);
-            w.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(x: Widget<Action>, y: Widget<Action>) {
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
-    }
-
-    #[test]
-    fn widget_hash_depends_on_discriminant() {
-        let col: Widget<Action> = Column { children: vec![] }.into();
-        let row: Widget<Action> = Row { children: vec![] }.into();
-
-        let mut a = DefaultHasher::new();
-        col.hash(&mut a);
-
-        let mut b = DefaultHasher::new();
-        row.hash(&mut b);
-
-        assert_ne!(a.finish(), b.finish())
     }
 }
