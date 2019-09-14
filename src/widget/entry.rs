@@ -1,4 +1,4 @@
-use crate::{event::Entered, widget::Widget, Handler, Variant};
+use crate::{event::Entered, widget::Widget, OptionalHandler, Variant};
 
 /// The semantic representation of text input.
 #[derive(derivative::Derivative)]
@@ -12,7 +12,7 @@ use crate::{event::Entered, widget::Widget, Handler, Variant};
 )]
 pub struct Entry<A> {
     pub value: String,
-    pub handler: Option<Handler<Entry<A>, Entered, A>>,
+    pub handler: OptionalHandler<Entry<A>, Entered, A>,
 }
 
 impl<'w, A> Variant<Widget<'w, A>> for Entry<A> {}
@@ -26,7 +26,7 @@ impl<A: 'static + Default> Arbitrary for Entry<A> {
     type Strategy = BoxedStrategy<Self>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (any::<String>(), any::<Option<Handler<_, _, _>>>())
+        (any::<String>(), any::<OptionalHandler<_, _, _>>())
             .prop_map(|(value, handler)| Entry { value, handler })
             .boxed()
     }
@@ -47,7 +47,7 @@ mod tests {
             Entry::<Action>::default(),
             Entry {
                 value: "".into(),
-                handler: None,
+                handler: OptionalHandler::None,
             }
         );
     }
