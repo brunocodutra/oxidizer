@@ -2,7 +2,7 @@ mod handler;
 mod mock;
 mod sugar;
 
-pub use handler::Handler;
+pub use handler::{Handler, OptionalHandler};
 
 pub mod event;
 pub use event::Event;
