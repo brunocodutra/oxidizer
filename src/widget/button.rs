@@ -1,4 +1,4 @@
-use crate::{event::Clicked, widget::Widget, Handler, Variant};
+use crate::{event::Clicked, widget::Widget, OptionalHandler, Variant};
 
 /// The semantic representation of a button.
 #[derive(derivative::Derivative)]
@@ -12,7 +12,7 @@ use crate::{event::Clicked, widget::Widget, Handler, Variant};
 )]
 pub struct Button<A> {
     pub label: String,
-    pub handler: Option<Handler<Button<A>, Clicked, A>>,
+    pub handler: OptionalHandler<Button<A>, Clicked, A>,
 }
 
 impl<'w, A> Variant<Widget<'w, A>> for Button<A> {}
@@ -26,7 +26,7 @@ impl<A: 'static + Default> Arbitrary for Button<A> {
     type Strategy = BoxedStrategy<Self>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (any::<String>(), any::<Option<Handler<_, _, _>>>())
+        (any::<String>(), any::<OptionalHandler<_, _, _>>())
             .prop_map(|(label, handler)| Button { label, handler })
             .boxed()
     }
@@ -47,7 +47,7 @@ mod tests {
             Button::<Action>::default(),
             Button {
                 label: "".into(),
-                handler: None,
+                handler: OptionalHandler::None,
             }
         );
     }

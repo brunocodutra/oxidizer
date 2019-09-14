@@ -1,4 +1,4 @@
-use crate::{event::Toggled, widget::Widget, Handler, Variant};
+use crate::{event::Toggled, widget::Widget, OptionalHandler, Variant};
 
 /// The semantic representation of a checkbox.
 #[derive(derivative::Derivative)]
@@ -13,7 +13,7 @@ use crate::{event::Toggled, widget::Widget, Handler, Variant};
 pub struct Checkbox<A> {
     pub label: String,
     pub value: bool,
-    pub handler: Option<Handler<Checkbox<A>, Toggled, A>>,
+    pub handler: OptionalHandler<Checkbox<A>, Toggled, A>,
 }
 
 impl<'w, A> Variant<Widget<'w, A>> for Checkbox<A> {}
@@ -30,7 +30,7 @@ impl<A: 'static + Default> Arbitrary for Checkbox<A> {
         (
             any::<String>(),
             any::<bool>(),
-            any::<Option<Handler<_, _, _>>>(),
+            any::<OptionalHandler<_, _, _>>(),
         )
             .prop_map(|(label, value, handler)| Checkbox {
                 label,
@@ -57,7 +57,7 @@ mod tests {
             Checkbox {
                 value: false,
                 label: "".into(),
-                handler: None,
+                handler: OptionalHandler::None,
             }
         );
     }

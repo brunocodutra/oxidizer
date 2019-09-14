@@ -9,7 +9,7 @@
 ///
 /// enum Action { /* ... */ }
 ///
-/// let handle: fn(&Widget<_>, &Event) -> _ = |widget, event| {
+/// let handler: fn(&Widget<_>, &Event) -> _ = |widget, event| {
 ///     // ...
 ///     # unimplemented!()
 /// };
@@ -17,11 +17,11 @@
 /// let ui: Widget<Action> = widget!(
 ///     Column [
 ///         Row [
-///             Entry { handler: Handler::from(handle) }
-///             Button { label: "Add Todo", handler: Handler::from(handle) }
+///             Entry { handler }
+///             Button { label: "Add Todo", handler }
 ///         ]
-///         Checkbox { label: "buy milk", handler: Handler::from(handle) }
-///         Checkbox { label: "learn oxidizer", handler: Handler::from(handle) }
+///         Checkbox { label: "buy milk", handler }
+///         Checkbox { label: "learn oxidizer", handler }
 ///     ]
 /// );
 ///
@@ -31,23 +31,23 @@
 ///                 children: vec![
 ///                     Widget::from(Entry {
 ///                         value: "".to_string(),
-///                         handler: Some(Handler::from(handle)),
+///                         handler: handler.into(),
 ///                     }),
 ///                     Widget::from(Button {
 ///                         label: "Add Todo".to_string(),
-///                         handler: Some(Handler::from(handle)),
+///                         handler: handler.into(),
 ///                     }),
 ///                 ]
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "buy milk".to_string(),
-///                 handler: Some(Handler::from(handle)),
+///                 handler: handler.into(),
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
 ///                 label: "learn oxidizer".to_string(),
-///                 handler: Some(Handler::from(handle)),
+///                 handler: handler.into(),
 ///             }),
 ///         ]
 ///     })
@@ -88,7 +88,7 @@ macro_rules! widget {
 
 #[cfg(test)]
 mod tests {
-    use crate::{widget::*, Handler};
+    use crate::widget::*;
     use proptest::prelude::*;
 
     proptest! {
@@ -193,12 +193,12 @@ mod tests {
 
         #[test]
         fn button_optionally_takes_a_handler(_: ()) {
-            let handler = Handler::new(|_, _| {});
+            let handler: fn(&_, &_) = |_, _| {};
 
             assert_eq!(
                 widget!(Button { handler }),
                 Widget::from(Button {
-                    handler: Some(handler),
+                    handler: handler.into(),
                     ..Default::default()
                 })
             );
@@ -225,12 +225,12 @@ mod tests {
 
         #[test]
         fn entry_optionally_takes_a_handler(_: ()) {
-            let handler = Handler::new(|_, _| {});
+            let handler: fn(&_, &_) = |_, _| {};
 
             assert_eq!(
                 widget!(Entry { handler }),
                 Widget::from(Entry {
-                    handler: Some(handler),
+                    handler: handler.into(),
                     ..Default::default()
                 })
             );
@@ -255,12 +255,12 @@ mod tests {
 
         #[test]
         fn checkbox_optionally_takes_a_handler(_: ()) {
-            let handler = Handler::new(|_, _| {});
+            let handler: fn(&_, &_) = |_, _| {};
 
             assert_eq!(
                 widget!(Checkbox { handler }),
                 Widget::from(Checkbox {
-                    handler: Some(handler),
+                    handler: handler.into(),
                     ..Default::default()
                 })
             );
