@@ -38,27 +38,32 @@ impl<T: 'static + Arbitrary> Arbitrary for Changed<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::*;
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[test]
     fn default() {
-        assert_eq!(Changed::<&str>::default(), Changed { value: "" });
+        assert_eq!(Entered::default(), Changed { value: "".into() });
         assert_eq!(Toggled::default(), Changed { value: false });
         assert_eq!(Clicked::default(), Clicked { value: () });
     }
 
     proptest! {
+        #[allow(clippy::clone_on_copy)]
         #[test]
-        fn clone(changed: Changed<String>) {
+        fn clone(changed: Changed<u32>) {
             assert_eq!(changed.clone(), changed);
         }
 
         #[test]
-        fn hash(changed: Changed<u32>) {
-            let mut hasher = NopHash(0);
-            changed.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(x: Changed<u32>, y: Changed<u32>) {
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
     }
 }

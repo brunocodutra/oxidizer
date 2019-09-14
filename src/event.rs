@@ -83,8 +83,8 @@ impl Arbitrary for Event<'static> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::*;
     use maybe_owned::MaybeOwned::*;
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     proptest! {
@@ -115,10 +115,14 @@ mod tests {
         }
 
         #[test]
-        fn hash(e: Event) {
-            let mut hasher = NopHash(0);
-            e.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(x: Event, y: Event) {
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
     }
 }

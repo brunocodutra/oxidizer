@@ -44,7 +44,7 @@ impl<A: 'static + Default> Arbitrary for Checkbox<A> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::*;
+    use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     #[derive(Default)]
@@ -69,10 +69,14 @@ mod tests {
         }
 
         #[test]
-        fn hash(checkbox: Checkbox<Action>) {
-            let mut hasher = NopHash(0);
-            checkbox.hash(&mut hasher);
-            assert_eq!(hasher.finish(), 0);
+        fn hash(x: Checkbox<Action>, y: Checkbox<Action>) {
+            let mut a = DefaultHasher::new();
+            x.hash(&mut a);
+
+            let mut b = DefaultHasher::new();
+            y.hash(&mut b);
+
+            assert_eq!(x == y, a.finish() == b.finish());
         }
     }
 }
