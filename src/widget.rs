@@ -24,7 +24,7 @@ pub enum Widget<'w, A> {
     Checkbox(MaybeOwned<'w, Checkbox<A>>),
 }
 
-impl<'w, A> Kind<Widget<'w, A>> for Widget<'w, A> {}
+impl<'a, 'w, A> Kind<Widget<'a, A>> for Widget<'w, A> {}
 
 impl<'w, A> Eq for Widget<'w, A> {}
 
