@@ -133,6 +133,22 @@ impl<'a: 'w, 'w, A> From<&'a Checkbox<A>> for Widget<'w, A> {
     }
 }
 
+use std::slice::Iter;
+
+impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
+    type Item = &'a Widget<'w, A>;
+    type IntoIter = Iter<'a, Widget<'w, A>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        use Widget::*;
+        match self {
+            Row(w) => w.into_iter(),
+            Column(w) => w.into_iter(),
+            _ => [].iter(),
+        }
+    }
+}
+
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, collection::*, prelude::*, strategy::*, test_runner::*};
 
@@ -208,6 +224,7 @@ mod tests {
     use maybe_owned::MaybeOwned::*;
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
+    use std::iter::FromIterator;
 
     #[derive(Default)]
     struct Action;
@@ -262,6 +279,18 @@ mod tests {
             y.hash(&mut b);
 
             assert_eq!(x == y, a.finish() == b.finish());
+        }
+
+        #[test]
+        fn into_iter(w: Widget<Action>) {
+            let items = Vec::from_iter(&w);
+
+            use Widget::*;
+            match &w {
+                Row(w) => assert_eq!(items, Vec::from_iter(&**w)),
+                Column(w) => assert_eq!(items, Vec::from_iter(&**w)),
+                _ => assert_eq!(items, Vec::<&Widget<_>>::new())
+            }
         }
     }
 }
