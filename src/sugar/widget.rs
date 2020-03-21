@@ -125,7 +125,7 @@ mod tests {
                         widget!(Column [
                             Entry
                             Button { label: label.clone() }
-                            Checkbox { label: label.clone(), value }
+                            Checkbox { label: label, value }
                         ])
                     ]
                 })
@@ -165,7 +165,7 @@ mod tests {
                         widget!(Row [
                             Entry
                             Button { label: label.clone() }
-                            Checkbox { label: label.clone(), value }
+                            Checkbox { label: label, value }
                         ])
                     ]
                 })
