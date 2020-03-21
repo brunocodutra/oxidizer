@@ -13,7 +13,7 @@ pub enum Event<'e> {
     Clicked(MaybeOwned<'e, Clicked>),
 }
 
-impl<'e> Kind<Event<'e>> for Event<'e> {}
+impl<'a, 'e> Kind<Event<'a>> for Event<'e> {}
 
 impl<'a: 'f, 'e: 'f, 'f> From<&'a Event<'e>> for Event<'f> {
     fn from(event: &'a Event<'e>) -> Self {
