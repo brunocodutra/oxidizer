@@ -16,6 +16,17 @@ pub struct Row<'w, A> {
 
 impl<'w, A> Variant<Widget<'w, A>> for Row<'w, A> {}
 
+use std::slice::Iter;
+
+impl<'a, 'w: 'a, A> IntoIterator for &'a Row<'w, A> {
+    type Item = &'a Widget<'w, A>;
+    type IntoIter = Iter<'a, Widget<'w, A>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.children.iter()
+    }
+}
+
 #[cfg(test)]
 use super::ChildrenStrategy;
 
@@ -61,6 +72,12 @@ mod tests {
             y.hash(&mut b);
 
             assert_eq!(x == y, a.finish() == b.finish());
+        }
+
+        #[test]
+        fn into_iter(row: Row<Action>) {
+            let items = row.into_iter().cloned().collect::<Vec<_>>();
+            assert_eq!(items, row.children)
         }
     }
 }
