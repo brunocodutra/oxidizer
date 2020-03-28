@@ -171,7 +171,7 @@ pub struct Cardinality(
 #[derivative(Debug(bound = ""), Default(bound = ""), Clone(bound = ""))]
 pub struct ChildrenStrategy<A: 'static + Default>(
     #[derivative(Default(
-        value = "vec(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..BREADTH)"
+        value = "vec(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..=BREADTH)"
     ))]
     VecStrategy<BoxedStrategy<Widget<'static, A>>>,
 );
@@ -209,9 +209,8 @@ impl<A: 'static + Default> Arbitrary for Widget<'static, A> {
         ]
         .prop_recursive(d as u32, size as u32, b as u32, move |inner| {
             prop_oneof![
-                any_with::<Row<A>>(children(inner.clone(), 0..b)).prop_map_into(),
-                any_with::<Column<A>>(children(inner.clone(), 0..b)).prop_map_into(),
-                inner,
+                any_with::<Row<A>>(children(inner.clone(), 0..=b)).prop_map_into(),
+                any_with::<Column<A>>(children(inner.clone(), 0..=b)).prop_map_into(),
             ]
         })
         .boxed()
