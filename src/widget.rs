@@ -157,6 +157,15 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
     }
 }
 
+use std::ops::Index;
+
+impl<'w, A, I: TreeIndex<usize>> Index<I> for Widget<'w, A> {
+    type Output = Self;
+    fn index(&self, index: I) -> &Self::Output {
+        self.get(index).expect("Out of bounds access")
+    }
+}
+
 #[cfg(test)]
 use proptest::{arbitrary::Arbitrary, collection::*, prelude::*, strategy::*, test_runner::*};
 
@@ -316,6 +325,23 @@ mod tests {
                 Column(w) => assert_eq!(items, Vec::from_iter(&**w)),
                 _ => assert_eq!(items, Vec::<&Widget<_>>::new())
             }
+        }
+
+        #[test]
+        fn index(root: Widget<Action>) {
+            let mut indices = vec![Vec::<usize>::new()];
+
+            while let Some(p) = indices.pop() {
+                let w = &root[&p];
+                assert_eq!(Some(w), root.get(&p));
+                indices.extend((0..w.into_iter().count()).map(|i| [&p[..], &[i]].concat()))
+            }
+        }
+
+        #[test]
+        #[should_panic]
+        fn index_out_of_bounds(w: Widget<Action>) {
+            let _ = &w[&[w.into_iter().count()]];
         }
     }
 }
