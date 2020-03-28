@@ -10,7 +10,7 @@ pub use column::*;
 pub use entry::*;
 pub use row::*;
 
-use crate::Kind;
+use crate::{Kind, TreeIndex};
 use maybe_owned::MaybeOwned;
 
 /// The semantic representation of a widget.
@@ -22,6 +22,14 @@ pub enum Widget<'w, A> {
     Button(MaybeOwned<'w, Button<A>>),
     Entry(MaybeOwned<'w, Entry<A>>),
     Checkbox(MaybeOwned<'w, Checkbox<A>>),
+}
+
+impl<'w, A> Widget<'w, A> {
+    pub fn get<I: Into<usize>>(&self, index: impl TreeIndex<I>) -> Option<&Widget<'w, A>> {
+        index.path().fold(Some(self), |r, i| {
+            r.and_then(|w| w.into_iter().nth(i.into()))
+        })
+    }
 }
 
 impl<'a, 'w, A> Kind<Widget<'a, A>> for Widget<'w, A> {}
@@ -229,6 +237,24 @@ mod tests {
     struct Action;
 
     proptest! {
+        #[test]
+        fn get(root: Widget<Action>) {
+            let mut indexed = vec![(Vec::<usize>::new(), &root)];
+
+            while let Some((p, w)) = indexed.pop() {
+                assert_eq!(root.get(&p), Some(w));
+
+                let out_of_bounds = [&p[..], &[w.into_iter().count()]].concat();
+                assert_eq!(root.get(&out_of_bounds), None);
+
+                indexed.extend(
+                    w.into_iter()
+                        .enumerate()
+                        .map(|(i, w)| ([&p[..], &[i]].concat(), w)),
+                );
+            }
+        }
+
         #[test]
         fn from_row(w: Row<Action>) {
             assert_eq!(Widget::from(&w), Widget::Row(Borrowed(&w)));
