@@ -179,7 +179,10 @@ where
     Debug(bound = ""),
     Default(bound = ""),
     Copy(bound = ""),
-    Clone(bound = "")
+    Clone(bound = ""),
+    Eq(bound = ""),
+    PartialEq(bound = ""),
+    Hash(bound = "")
 )]
 pub enum OptionalHandler<W, E, A>
 where
@@ -189,44 +192,6 @@ where
     Some(Handler<W, E, A>),
     #[derivative(Default)]
     None,
-}
-
-impl<W, E, A> Eq for OptionalHandler<W, E, A>
-where
-    for<'a> W: Kind<Widget<'a, A>>,
-    for<'a> E: Kind<Event<'a>>,
-{
-}
-
-impl<W, E, A> PartialEq for OptionalHandler<W, E, A>
-where
-    for<'a> W: Kind<Widget<'a, A>>,
-    for<'a> E: Kind<Event<'a>>,
-{
-    fn eq(&self, other: &Self) -> bool {
-        use OptionalHandler::*;
-        match (self, other) {
-            (Some(a), Some(b)) => a == b,
-            (None, None) => true,
-            _ => false,
-        }
-    }
-}
-
-use std::mem::discriminant;
-
-impl<W, E, A> Hash for OptionalHandler<W, E, A>
-where
-    for<'a> W: Kind<Widget<'a, A>>,
-    for<'a> E: Kind<Event<'a>>,
-{
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        if let OptionalHandler::Some(h) = self {
-            h.hash(state);
-        }
-
-        discriminant(self).hash(state);
-    }
 }
 
 impl<H, W, E, A> From<H> for OptionalHandler<W, E, A>
