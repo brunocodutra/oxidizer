@@ -15,7 +15,13 @@ use maybe_owned::MaybeOwned;
 
 /// The semantic representation of a widget.
 #[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derivative(
+    Debug(bound = ""),
+    Clone(bound = ""),
+    Eq(bound = ""),
+    PartialEq(bound = ""),
+    Hash(bound = "")
+)]
 pub enum Widget<'w, A> {
     Row(MaybeOwned<'w, Row<'w, A>>),
     Column(MaybeOwned<'w, Column<'w, A>>),
@@ -33,40 +39,6 @@ impl<'w, A> Widget<'w, A> {
 }
 
 impl<'a, 'w, A> Kind<Widget<'a, A>> for Widget<'w, A> {}
-
-impl<'w, A> Eq for Widget<'w, A> {}
-
-impl<'w, A> PartialEq for Widget<'w, A> {
-    fn eq(&self, other: &Self) -> bool {
-        use Widget::*;
-        match (self, other) {
-            (Row(a), Row(b)) => a == b,
-            (Column(a), Column(b)) => a == b,
-            (Button(a), Button(b)) => a == b,
-            (Entry(a), Entry(b)) => a == b,
-            (Checkbox(a), Checkbox(b)) => a == b,
-            _ => false,
-        }
-    }
-}
-
-use std::hash::{Hash, Hasher};
-use std::mem::discriminant;
-
-impl<'w, A> Hash for Widget<'w, A> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        use Widget::*;
-        match self {
-            Row(w) => w.hash(state),
-            Column(w) => w.hash(state),
-            Button(w) => w.hash(state),
-            Entry(w) => w.hash(state),
-            Checkbox(w) => w.hash(state),
-        }
-
-        discriminant(self).hash(state);
-    }
-}
 
 impl<'a: 'v, 'w: 'v, 'v, A> From<&'a Widget<'w, A>> for Widget<'v, A> {
     fn from(widget: &'a Widget<'w, A>) -> Self {
