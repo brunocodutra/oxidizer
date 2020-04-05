@@ -31,12 +31,8 @@ pub enum Widget<'w, A> {
 }
 
 impl<'w, A> Widget<'w, A> {
-    pub fn get<'s, S, P>(&self, path: P) -> Option<&Widget<'w, A>>
-    where
-        S: 's + Copy + Into<usize>,
-        P: TreePath<Segment = &'s S>,
-    {
-        path.segments().into_iter().fold(Some(self), |r, &i| {
+    pub fn get<S: Into<usize>>(&self, path: impl TreePath<Segment = S>) -> Option<&Widget<'w, A>> {
+        path.segments().into_iter().fold(Some(self), |r, i| {
             r.and_then(|w| w.into_iter().nth(i.into()))
         })
     }
@@ -135,11 +131,7 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
 
 use std::ops::Index;
 
-impl<'w, 's, A, S, P> Index<P> for Widget<'w, A>
-where
-    S: 's + Copy + Into<usize>,
-    P: TreePath<Segment = &'s S>,
-{
+impl<'w, A, S: Into<usize>, P: TreePath<Segment = S>> Index<P> for Widget<'w, A> {
     type Output = Self;
     fn index(&self, path: P) -> &Self::Output {
         self.get(path).expect("Out of bounds access")
@@ -231,10 +223,10 @@ mod tests {
             let mut indexed = vec![(Vec::<usize>::new(), &root)];
 
             while let Some((p, w)) = indexed.pop() {
-                assert_eq!(root.get(&p), Some(w));
+                assert_eq!(root.get(p.iter().copied()), Some(w));
 
                 let out_of_bounds = [&p[..], &[w.into_iter().count()]].concat();
-                assert_eq!(root.get(&out_of_bounds), None);
+                assert_eq!(root.get(out_of_bounds), None);
 
                 indexed.extend(
                     w.into_iter()
@@ -312,16 +304,16 @@ mod tests {
             let mut indices = vec![Vec::<usize>::new()];
 
             while let Some(p) = indices.pop() {
-                let w = &root[&p];
-                assert_eq!(Some(w), root.get(&p));
-                indices.extend((0..w.into_iter().count()).map(|i| [&p[..], &[i]].concat()))
+                let w = &root[p.iter().copied()];
+                indices.extend((0..w.into_iter().count()).map(|i| [&p[..], &[i]].concat()));
+                assert_eq!(Some(w), root.get(p));
             }
         }
 
         #[test]
         #[should_panic]
         fn index_out_of_bounds(w: Widget<Action>) {
-            let _ = &w[&[w.into_iter().count()]];
+            let _ = &w[vec![w.into_iter().count()]];
         }
     }
 }
