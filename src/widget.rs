@@ -32,7 +32,7 @@ pub enum Widget<'w, A> {
 
 impl<'w, A> Widget<'w, A> {
     pub fn get<I: Into<usize>>(&self, index: impl TreeIndex<I>) -> Option<&Widget<'w, A>> {
-        index.path().fold(Some(self), |r, i| {
+        index.path().into_iter().fold(Some(self), |r, i| {
             r.and_then(|w| w.into_iter().nth(i.into()))
         })
     }
