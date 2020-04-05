@@ -31,8 +31,12 @@ pub enum Widget<'w, A> {
 }
 
 impl<'w, A> Widget<'w, A> {
-    pub fn get<I: Into<usize>>(&self, index: impl TreeIndex<I>) -> Option<&Widget<'w, A>> {
-        index.path().into_iter().fold(Some(self), |r, i| {
+    pub fn get<'i, I, Idx>(&self, index: Idx) -> Option<&Widget<'w, A>>
+    where
+        I: 'i + Copy + Into<usize>,
+        Idx: TreeIndex<&'i I>,
+    {
+        index.path().into_iter().fold(Some(self), |r, &i| {
             r.and_then(|w| w.into_iter().nth(i.into()))
         })
     }
@@ -131,9 +135,9 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
 
 use std::ops::Index;
 
-impl<'w, A, I: TreeIndex<usize>> Index<I> for Widget<'w, A> {
+impl<'w, 'i, A, Idx: TreeIndex<&'i usize>> Index<Idx> for Widget<'w, A> {
     type Output = Self;
-    fn index(&self, index: I) -> &Self::Output {
+    fn index(&self, index: Idx) -> &Self::Output {
         self.get(index).expect("Out of bounds access")
     }
 }
