@@ -1,5 +1,5 @@
 mod handler;
-mod index;
+mod path;
 mod sugar;
 
 pub use handler::{Handler, OptionalHandler};
@@ -10,7 +10,7 @@ pub use event::Event;
 pub mod widget;
 pub use widget::Widget;
 
-pub use index::TreeIndex;
+pub use path::TreePath;
 
 /// Marker trait used to denote an abstract _kind_.
 ///

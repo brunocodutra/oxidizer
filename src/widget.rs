@@ -10,7 +10,7 @@ pub use column::*;
 pub use entry::*;
 pub use row::*;
 
-use crate::{Kind, TreeIndex};
+use crate::{Kind, TreePath};
 use maybe_owned::MaybeOwned;
 
 /// The semantic representation of a widget.
@@ -31,12 +31,12 @@ pub enum Widget<'w, A> {
 }
 
 impl<'w, A> Widget<'w, A> {
-    pub fn get<'i, I, Idx>(&self, index: Idx) -> Option<&Widget<'w, A>>
+    pub fn get<'s, S, P>(&self, path: P) -> Option<&Widget<'w, A>>
     where
-        I: 'i + Copy + Into<usize>,
-        Idx: TreeIndex<&'i I>,
+        S: 's + Copy + Into<usize>,
+        P: TreePath<&'s S>,
     {
-        index.path().into_iter().fold(Some(self), |r, &i| {
+        path.segments().into_iter().fold(Some(self), |r, &i| {
             r.and_then(|w| w.into_iter().nth(i.into()))
         })
     }
@@ -135,10 +135,10 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
 
 use std::ops::Index;
 
-impl<'w, 'i, A, Idx: TreeIndex<&'i usize>> Index<Idx> for Widget<'w, A> {
+impl<'w, 's, A, P: TreePath<&'s usize>> Index<P> for Widget<'w, A> {
     type Output = Self;
-    fn index(&self, index: Idx) -> &Self::Output {
-        self.get(index).expect("Out of bounds access")
+    fn index(&self, path: P) -> &Self::Output {
+        self.get(path).expect("Out of bounds access")
     }
 }
 
