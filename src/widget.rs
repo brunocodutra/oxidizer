@@ -34,7 +34,7 @@ impl<'w, A> Widget<'w, A> {
     pub fn get<'s, S, P>(&self, path: P) -> Option<&Widget<'w, A>>
     where
         S: 's + Copy + Into<usize>,
-        P: TreePath<&'s S>,
+        P: TreePath<Segment = &'s S>,
     {
         path.segments().into_iter().fold(Some(self), |r, &i| {
             r.and_then(|w| w.into_iter().nth(i.into()))
@@ -135,7 +135,11 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Widget<'w, A> {
 
 use std::ops::Index;
 
-impl<'w, 's, A, P: TreePath<&'s usize>> Index<P> for Widget<'w, A> {
+impl<'w, 's, A, S, P> Index<P> for Widget<'w, A>
+where
+    S: 's + Copy + Into<usize>,
+    P: TreePath<Segment = &'s S>,
+{
     type Output = Self;
     fn index(&self, path: P) -> &Self::Output {
         self.get(path).expect("Out of bounds access")
