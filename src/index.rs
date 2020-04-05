@@ -1,7 +1,7 @@
 use std::iter::Copied;
 
 pub trait TreeIndex<I: Into<usize>> {
-    type Path: Iterator<Item = I>;
+    type Path: IntoIterator<Item = I>;
     fn path(&self) -> Self::Path;
 }
 
