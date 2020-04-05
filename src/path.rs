@@ -1,14 +1,16 @@
-pub trait TreePath<I> {
-    type Segments: IntoIterator<Item = I>;
+pub trait TreePath {
+    type Segment;
+    type Segments: IntoIterator<Item = Self::Segment>;
     fn segments(&self) -> Self::Segments;
 }
 
-impl<'s, P, S> TreePath<&'s S> for &'s P
+impl<'s, P, S> TreePath for &'s P
 where
     P: ?Sized,
     &'s P: IntoIterator<Item = &'s S>,
     S: 's + ?Sized,
 {
+    type Segment = &'s S;
     type Segments = Self;
 
     fn segments(&self) -> Self::Segments {
