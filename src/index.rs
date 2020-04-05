@@ -1,20 +1,18 @@
-use std::iter::Copied;
-
-pub trait TreeIndex<I: Into<usize>> {
+pub trait TreeIndex<I> {
     type Path: IntoIterator<Item = I>;
     fn path(&self) -> Self::Path;
 }
 
-impl<'a, T, I> TreeIndex<I> for &'a T
+impl<'i, Idx, I> TreeIndex<&'i I> for &'i Idx
 where
-    T: ?Sized,
-    &'a T: IntoIterator<Item = &'a I>,
-    I: 'a + Into<usize> + Copy,
+    Idx: ?Sized,
+    &'i Idx: IntoIterator<Item = &'i I>,
+    I: 'i + ?Sized,
 {
-    type Path = Copied<<&'a T as IntoIterator>::IntoIter>;
+    type Path = Self;
 
     fn path(&self) -> Self::Path {
-        self.into_iter().copied()
+        self
     }
 }
 
@@ -25,8 +23,8 @@ mod tests {
 
     proptest! {
         #[test]
-        fn path(p: Vec<u8>) {
-            assert_eq!((&p[..]).path().collect::<Vec<_>>(), p);
+        fn blanket(p: Vec<u8>) {
+            assert_eq!((&p[..]).path(), &p[..]);
         }
     }
 }
