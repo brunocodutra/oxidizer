@@ -25,7 +25,7 @@ mod tests {
 
     proptest! {
         #[test]
-        fn from_row(p: Vec<u8>) {
+        fn path(p: Vec<u8>) {
             assert_eq!((&p[..]).path().collect::<Vec<_>>(), p);
         }
     }
