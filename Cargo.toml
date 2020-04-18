@@ -11,8 +11,8 @@ keywords = ["gui", "ui", "async"]
 categories = ["gui"]
 
 [dependencies]
-derivative = "2.1.0"
+derivative = "2.1.1"
 maybe-owned = "0.3.2"
 
 [dev-dependencies]
-proptest = "0.9.1"
+proptest = "0.9.6"
