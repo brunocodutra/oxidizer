@@ -11,7 +11,7 @@ use crate::{widget::Widget, Variant};
     Hash(bound = "")
 )]
 pub struct Row<'w, A> {
-    pub children: Vec<Widget<'w, A>>,
+    pub children: Box<[Widget<'w, A>]>,
 }
 
 impl<'w, A> Variant<Widget<'w, A>> for Row<'w, A> {}
@@ -54,7 +54,12 @@ mod tests {
 
     #[test]
     fn default() {
-        assert_eq!(Row::<Action>::default(), Row { children: vec![] });
+        assert_eq!(
+            Row::<Action>::default(),
+            Row {
+                children: Default::default()
+            }
+        );
     }
 
     proptest! {
@@ -76,7 +81,7 @@ mod tests {
 
         #[test]
         fn into_iter(row: Row<Action>) {
-            let items = row.into_iter().cloned().collect::<Vec<_>>();
+            let items = row.into_iter().cloned().collect::<Box<[_]>>();
             assert_eq!(items, row.children)
         }
     }

@@ -26,9 +26,9 @@
 /// );
 ///
 /// assert_eq!(ui, Widget::from(Column {
-///         children: vec![
+///         children: Box::new([
 ///             Widget::from(Row {
-///                 children: vec![
+///                 children: Box::new([
 ///                     Widget::from(Entry {
 ///                         value: "".to_string(),
 ///                         handler: handler.into(),
@@ -37,7 +37,7 @@
 ///                         label: "Add Todo".to_string(),
 ///                         handler: handler.into(),
 ///                     }),
-///                 ]
+///                 ])
 ///             }),
 ///             Widget::from(Checkbox {
 ///                 value: false,
@@ -49,7 +49,7 @@
 ///                 label: "learn oxidizer".to_string(),
 ///                 handler: handler.into(),
 ///             }),
-///         ]
+///         ])
 ///     })
 /// );
 /// ```
@@ -116,7 +116,7 @@ mod tests {
                     ]
                 ),
                 Widget::from(Row::<()> {
-                    children: vec![
+                    children: Box::new([
                         widget!(Entry),
                         widget!(Button {
                             label: label.clone()
@@ -127,7 +127,7 @@ mod tests {
                             Button { label: label.clone() }
                             Checkbox { label: label, value }
                         ])
-                    ]
+                    ])
                 })
             );
         }
@@ -156,7 +156,7 @@ mod tests {
                     ]
                 ),
                 Widget::from(Column::<()> {
-                    children: vec![
+                    children: Box::new([
                         widget!(Entry),
                         widget!(Button {
                             label: label.clone()
@@ -167,7 +167,7 @@ mod tests {
                             Button { label: label.clone() }
                             Checkbox { label: label, value }
                         ])
-                    ]
+                    ])
                 })
             );
         }
