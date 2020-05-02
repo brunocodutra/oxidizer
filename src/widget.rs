@@ -36,6 +36,15 @@ impl<'w, A> Widget<'w, A> {
             r.and_then(|w| w.into_iter().nth(i.into()))
         })
     }
+
+    pub fn children(&self) -> &[Self] {
+        use Widget::*;
+        match self {
+            Row(w) => w,
+            Column(w) => w,
+            _ => &[],
+        }
+    }
 }
 
 impl<'a, 'w, A> Kind<Widget<'a, A>> for Widget<'w, A> {}
@@ -298,6 +307,16 @@ mod tests {
                 Row(w) => assert_eq!(items, Vec::from_iter(&**w)),
                 Column(w) => assert_eq!(items, Vec::from_iter(&**w)),
                 _ => assert_eq!(items, Vec::<&Widget<_>>::new())
+            }
+        }
+
+        #[test]
+        fn children(w: Widget<Action>) {
+            use Widget::*;
+            match &w {
+                Row(r) => assert_eq!(w.children(), &***r),
+                Column(c) => assert_eq!(w.children(), &***c),
+                _ => assert_eq!(w.children(), &[])
             }
         }
 
