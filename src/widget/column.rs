@@ -11,7 +11,7 @@ use crate::{widget::Widget, Variant};
     Hash(bound = "")
 )]
 pub struct Column<'w, A> {
-    pub children: Vec<Widget<'w, A>>,
+    pub children: Box<[Widget<'w, A>]>,
 }
 
 impl<'w, A> Variant<Widget<'w, A>> for Column<'w, A> {}
@@ -54,7 +54,12 @@ mod tests {
 
     #[test]
     fn default() {
-        assert_eq!(Column::<Action>::default(), Column { children: vec![] });
+        assert_eq!(
+            Column::<Action>::default(),
+            Column {
+                children: Default::default()
+            }
+        );
     }
 
     proptest! {
@@ -76,7 +81,7 @@ mod tests {
 
         #[test]
         fn into_iter(column: Column<Action>) {
-            let items = column.into_iter().cloned().collect::<Vec<_>>();
+            let items = column.into_iter().cloned().collect::<Box<[_]>>();
             assert_eq!(items, column.children)
         }
     }

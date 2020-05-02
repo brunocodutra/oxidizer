@@ -160,23 +160,25 @@ pub struct Cardinality(
 #[derivative(Debug(bound = ""), Default(bound = ""), Clone(bound = ""))]
 pub struct ChildrenStrategy<A: 'static + Default>(
     #[derivative(Default(
-        value = "vec(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..=BREADTH)"
+        value = "children(any_with::<Widget<A>>(Cardinality(DEPTH - 1, BREADTH)), 0..=BREADTH).0"
     ))]
-    VecStrategy<BoxedStrategy<Widget<'static, A>>>,
+    BoxedStrategy<Box<[Widget<'static, A>]>>,
 );
 
 #[cfg(test)]
-pub fn children<A: Default, T: Strategy<Value = Widget<'static, A>> + 'static>(
-    widgets: T,
-    size: impl Into<SizeRange>,
-) -> ChildrenStrategy<A> {
-    ChildrenStrategy(vec(widgets.boxed(), size))
+pub fn children<A, T, S>(widgets: T, size: S) -> ChildrenStrategy<A>
+where
+    A: Default,
+    T: Strategy<Value = Widget<'static, A>> + 'static,
+    S: Into<SizeRange>,
+{
+    ChildrenStrategy(vec(widgets, size).prop_map_into().boxed())
 }
 
 #[cfg(test)]
 impl<A: Default> Strategy for ChildrenStrategy<A> {
-    type Tree = <VecStrategy<BoxedStrategy<Widget<'static, A>>> as Strategy>::Tree;
-    type Value = <VecStrategy<BoxedStrategy<Widget<'static, A>>> as Strategy>::Value;
+    type Tree = <BoxedStrategy<Box<[Widget<'static, A>]>> as Strategy>::Tree;
+    type Value = Box<[Widget<'static, A>]>;
 
     fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
         self.0.new_tree(runner)
