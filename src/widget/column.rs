@@ -27,6 +27,16 @@ impl<'a, 'w: 'a, A> IntoIterator for &'a Column<'w, A> {
     }
 }
 
+use std::ops::Deref;
+
+impl<'w, A> Deref for Column<'w, A> {
+    type Target = [Widget<'w, A>];
+
+    fn deref(&self) -> &Self::Target {
+        &*self.children
+    }
+}
+
 #[cfg(test)]
 use super::ChildrenStrategy;
 
@@ -83,6 +93,11 @@ mod tests {
         fn into_iter(column: Column<Action>) {
             let items = column.into_iter().cloned().collect::<Box<[_]>>();
             assert_eq!(items, column.children)
+        }
+
+        #[test]
+        fn deref(column: Column<Action>) {
+            assert_eq!(column.deref(), &*column.children)
         }
     }
 }
