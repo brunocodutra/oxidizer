@@ -3,99 +3,100 @@ name: CI
 on:
   push:
     branches:
-    - master
-  pull_request:
-    branches:
-    - master
-  schedule:
-  - cron:  '0 6 * * SAT'
+    - ci
+  #   - master
+  # pull_request:
+  #   branches:
+  #   - master
+  # schedule:
+  # - cron:  '0 6 * * SAT'
 
 jobs:
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: stable
-        components: rustfmt
-    - run: cargo +stable fmt --all -- --check
+  # fmt:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: stable
+  #       components: rustfmt
+  #   - run: cargo +stable fmt --all -- --check
 
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: stable
-        components: clippy
-    - run: cargo +stable clippy --all-targets -- -D warnings
+  # clippy:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: stable
+  #       components: clippy
+  #   - run: cargo +stable clippy --all-targets -- -D warnings
 
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: stable
-    - run: cargo +stable install cargo-audit
-    - run: cargo +stable audit -D
+  # audit:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: stable
+  #   - run: cargo +stable install cargo-audit
+  #   - run: cargo +stable audit -D
 
-  doc:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: nightly
-    - run: cargo +nightly doc --all-features
+  # doc:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: nightly
+  #   - run: cargo +nightly doc --all-features
 
-  test:
-    needs: [fmt, clippy, audit, doc]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        rust: [stable, nightly]
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: ${{ matrix.rust }}
-    - run: cargo +${{ matrix.rust }} test
+  # test:
+  #   needs: [fmt, clippy, audit, doc]
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-latest, windows-latest, macOS-latest]
+  #       rust: [stable, nightly]
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: ${{ matrix.rust }}
+  #   - run: cargo +${{ matrix.rust }} test
 
-  sanitize:
-    needs: [test]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        sanitizer: [address, leak]
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: nightly
-    - run: RUSTFLAGS="-Z sanitizer=${{ matrix.sanitizer }}" cargo +nightly test --tests --lib --all-features --target x86_64-unknown-linux-gnu
+  # sanitize:
+  #   needs: [test]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       sanitizer: [address, leak]
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: nightly
+  #   - run: RUSTFLAGS="-Z sanitizer=${{ matrix.sanitizer }}" cargo +nightly test --tests --lib --all-features --target x86_64-unknown-linux-gnu
 
-  coverage:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: hecrj/setup-rust-action@master
-      with:
-        rust-version: nightly
-    - run: cargo +nightly install cargo-tarpaulin
-    - run: cargo +nightly tarpaulin --all-features --out Xml
-    - run: bash <(curl -s https://codecov.io/bash) -C $GITHUB_SHA -B ${GITHUB_REF#refs/heads/} -Z
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # coverage:
+  #   needs: [test]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@master
+  #   - uses: hecrj/setup-rust-action@master
+  #     with:
+  #       rust-version: nightly
+  #   - run: cargo +nightly install cargo-tarpaulin
+  #   - run: cargo +nightly tarpaulin --all-features --out Xml
+  #   - run: bash <(curl -s https://codecov.io/bash) -C $GITHUB_SHA -B ${GITHUB_REF#refs/heads/} -Z
+  #     env:
+  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   upgrade:
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    # if: github.event_name == 'schedule'
     steps:
     - uses: actions/checkout@master
     - uses: hecrj/setup-rust-action@master
