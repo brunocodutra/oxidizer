@@ -15,4 +15,4 @@ derivative = "2.1.1"
 maybe-owned = "0.3.4"
 
 [dev-dependencies]
-proptest = "0.10.1"
+proptest = "1.0.0"
